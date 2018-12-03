@@ -152,7 +152,7 @@ Location = ReferenceField(
             base_query={
                 'inactive_state': 'active',
                 'review_state': 'available',
-                'object_provides': ISampleStorageLocation.__identifier__
+                'object_provides': ISampleStorageLocation.__identifier__,
             },
             visible={'edit': 'visible', 'view': 'visible'},
             catalog_name='portal_catalog',
@@ -180,6 +180,7 @@ DateCreation = DateTimeField(
         visible={'edit': 'visible', 'view': 'visible'}
     )
 )
+
 
 SerumColour = StringField(
     'SerumColour',
@@ -242,6 +243,7 @@ class SampleBatch(BaseContent):
 
     def getSerumColours(self):
         return ['', 'golden (semi-transparent)', 'pink or red (haemolised)', 'opaque or white (lipaemic)']
+
 
 def ObjectModifiedEventHandler(instance, event):
     """ Called if the object is modified.
