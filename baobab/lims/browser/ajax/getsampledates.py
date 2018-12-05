@@ -24,13 +24,14 @@ class GetSampleDates(BrowserView):
 
         uc = getToolByName(self.context, 'portal_catalog')
 
-        # print('===================')
-        title = self.request.form['title']
-        # print(title)
+        print('===================')
+        print(self.request)
+        uid = self.request['UID']
+        print(uid)
         # print('Ajax has been reached.')
         # print(self.request)
 
-        brains = uc.searchResults(portal_type='Sample', Title=title)
+        brains = uc.searchResults(portal_type='Sample', UID=uid)
 
         try:
             sample = brains[0].getObject()

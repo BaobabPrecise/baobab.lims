@@ -6,19 +6,16 @@ function BaobabSampleBatchEditView() {
         // disable browser auto-complete
         $('input[type=text]').prop('autocomplete', 'off');
 
-        // console.log('=============')
-        // console.log($('#title').val())
-
+        var uid = $('#archetypes-fieldname-SubjectID').attr('data-uid');
         var requestData = {
             catalog_name: "bika_catalog",
             portal_type: "SampleBatch",
-            // Title: $('#title').val()
-            Title: $('#breadcrumbs-current').val()
+            UID: uid
         };
         window.bika.lims.jsonapi_read(requestData, function (data) {
             if (data.success && data.total_objects > 0) {
 
-                // console.log(data.objects[0])
+                console.log(data.objects[0])
 
                 var creation_date = data.objects[0]['creation_date']
                 if (creation_date){
