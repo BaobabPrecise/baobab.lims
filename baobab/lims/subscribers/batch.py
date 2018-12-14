@@ -5,15 +5,15 @@ def ObjectInitializedEventHandler(instance, event):
     """called an object is created
     """
     if instance.portal_type == 'SampleBatch':
-        # updateLocalServerTime(instance)
-        pass
+        updateLocalServerTime(instance)
+        # pass
 
 def ObjectModifiedEventHandler(instance, event):
     """ Called if the object is modified
     """
     if instance.portal_type == 'SampleBatch':
-        # updateLocalServerTime(instance)
-        pass
+        updateLocalServerTime(instance)
+        # pass
 
 def updateLocalServerTime(instance):
 

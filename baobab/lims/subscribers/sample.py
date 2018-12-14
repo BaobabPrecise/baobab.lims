@@ -33,7 +33,7 @@ def ObjectInitializedEventHandler(instance, event):
                 doActionFor(location, 'occupy')
                 instance.update_box_status(location)
 
-        # updateLocalServerTime(instance)
+        updateLocalServerTime(instance)
 
 
 def ObjectModifiedEventHandler(instance, event):
