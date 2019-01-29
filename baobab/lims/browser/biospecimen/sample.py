@@ -151,15 +151,15 @@ class EditView(BrowserView):
             sample_batch = sample.getField('Batch').get(sample)
             sample.processForm()
 
-            units = []
-            registry = queryUtility(IRegistry)
-            if registry is not None:
-                for unit in registry.get('baobab.lims.biospecimen.units', ()):
-                    units.append(unit)
-                units.append(unicode(request.form['Unit']))
-            unit_tuple = tuple(units)
+            #units = []
+            #registry = queryUtility(IRegistry)
+            #if registry is not None:
+            #    for unit in registry.get('baobab.lims.biospecimen.units', ()):
+            #        units.append(unit)
+            #    units.append(unicode(request.form['Unit']))
+            #unit_tuple = tuple(units)
 
-            registry.records.get('baobab.lims.biospecimen.units')._set_value(unit_tuple)
+            #registry.records.get('baobab.lims.biospecimen.units')._set_value(unit_tuple)
 
             sample.getField('Batch').set(sample, sample_batch)
 
