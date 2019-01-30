@@ -29,6 +29,8 @@ window.baobab.lims.controllers =  {
         ['BaobabSampleShipmentView'],
     ".portaltype-sample":
         ['BaobabSampleView'],
+    ".portaltype-boxmovement":
+        ['BaobabBoxMovementEditView'],
     ".portaltype-biospecimens":
         ['BaobabBiospecimensView'],
     ".portaltype-samplebatch":
@@ -87,7 +89,6 @@ window.baobab.lims.initialize = function() {
 
 (function( $ ) {
 $(document).ready(function(){
-
     // Initializes baobab.lims
     var length = window.baobab.lims.initialize();
 });
