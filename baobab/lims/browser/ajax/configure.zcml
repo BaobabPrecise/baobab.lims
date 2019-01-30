@@ -39,6 +39,12 @@
       permission="zope.Public"
     />
 
+    <browser:page
+      for="...interfaces.IBoxMovement"
+      name="get_boxmovement_creation_datetime"
+      class=".getboxmovementdatetime.BoxMovementCreationDate"
+      permission="zope.Public"
+    />
 
 
 </configure>
