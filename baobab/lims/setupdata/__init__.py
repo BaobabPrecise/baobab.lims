@@ -298,6 +298,400 @@ class Projects(WorksheetImporter):
             renameAfterCreation(obj)
 
 
+class SampleImport(WorksheetImporter):
+    """ Import biospecimens
+    """
+
+    def Import(self):
+
+        self._pc = getToolByName(self.context, 'portal_catalog')
+        self._bc = getToolByName(self.context, 'bika_catalog')
+
+        rows = self.get_rows(3)
+        for row in rows:
+            try:
+                self.create_biospecimen(row)
+            except:
+                continue
+
+    def get_storage_location(self, row_storage_location):
+        st_loc_list = self._pc(portal_type='StoragePosition', Title=row_storage_location)
+        storage_location = st_loc_list and st_loc_list[0].getObject() or None
+        return storage_location
+
+    def get_project(self, row_project):
+        project_list = self._pc(portal_type="Project", Title=row_project)
+        project = project_list and project_list[0].getObject() or None
+        return project
+
+    def get_sample_type(self, row_sample_type):
+        sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)
+        sample_type = sampletype_list and sampletype_list[0].getObject() or None
+        return sample_type
+
+    def get_linked_sample(self, row_linked_sample):
+        linked_sample_list = self._pc(portal_type="Sample", Title=row_linked_sample)
+        linked_sample = linked_sample_list and linked_sample_list[0].getObject() or None
+        return linked_sample
+
+
+    def get_volume(self, row_volume):
+        try:
+            volume = str(row_volume)
+            float_volume = float(volume)
+            if not float_volume:
+                raise ()
+            return str(float_volume)
+        except Exception as e:
+            print('Error has been found : %s' % str(e))
+            raise ()
+
+
+class ParentSample(SampleImport):
+    """ Import biospecimens
+    """
+
+    def create_biospecimen(self, row):
+        barcode = row.get('Barcode')
+        if not barcode:
+            raise ()
+
+        project = self.get_project(row.get('Project', ''))
+        if not project:
+            raise()
+
+        sample_type = self.get_sample_type(row.get('SampleType', ''))
+        if not sample_type:
+            raise()
+
+        volume = self.get_volume(row.get('Volume', ''))
+
+        obj = _createObjectByType('Sample', project, tmpID())
+
+        self.complete_biospecimen(obj, sample_type, barcode, volume, row)
+
+    def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
+        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+
+        obj.edit(
+            title=row.get('title'),
+            description=row.get('description'),
+            Project=project,
+            SampleType=sample_type,
+            StorageLocation=storage_location,
+            SubjectID=row.get('SubjectID'),
+            Barcode=barcode,
+            Volume=volume,
+            Unit=row.get('Unit'),
+            BabyNumber=row.get('BabyNo', ''),
+            # LinkedSample=linked_sample,
+            DateCreated=row.get('DateCreated'),
+            # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+            # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+        )
+
+        obj.reindexObject()
+
+        obj.unmarkCreationFlag()
+        renameAfterCreation(obj)
+
+        from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+        ObjectInitializedEventHandler(obj, None)
+
+
+
+
+class SampleBatch(WorksheetImporter):
+    """ Import biospecimens
+    """
+
+    def Import(self):
+        folder = self.context.samplebatches
+        rows = self.get_rows(3)
+
+        self._pc = getToolByName(self.context, 'portal_catalog')
+
+        for row in rows:
+            try:
+                selected_project = row.get('Project', '')
+                try:
+                    project_list = self._pc(portal_type="Project", Title=selected_project)
+                    project = project_list and project_list[0].getObject() or None
+                except:
+                    raise()
+                subject_id = row.get('SubjectID')
+                if not subject_id:
+                    raise()
+                parent_biospecimen_list = self._pc(portal_type="Sample", Title=row.get('ParentBiospecimen', ''))
+                parent_biospecimen = parent_biospecimen_list and parent_biospecimen_list[0].getObject() or None
+
+                boxes, storage_locations = self.getStorageLocations(row.get('StorageLocations', ''))
+
+                # print("-------------")
+                # print(boxes)
+                # print(storage_locations)
+
+                obj = _createObjectByType('SampleBatch', folder, tmpID())
+                obj.edit(
+                    Title='samplebatchtmptitle',
+                    Description=row.get('Description', ''),
+                    BatchType=row.get('BatchType', ''),
+                    Project=project,
+                    SubjectID=subject_id,
+                    StorageLocation=boxes,
+                    ParentBiospecimen=parent_biospecimen,
+                    DateCreated=row.get('DateCreated', ''),
+                    SerumColor=row.get('SerumColor', ''),
+                    CfgDateTime=row.get('CfgDateTime', ''),
+                )
+                obj.reindexObject()
+
+                obj.unmarkCreationFlag()
+                renameAfterCreation(obj)
+
+                self.createAliquots(row.get('AliquotSheetName'), project, obj.UID())
+
+            except:
+                continue
+
+    def createAliquots(self, sheet_name, project, batch_uid):
+
+        worksheet = self.workbook.get_sheet_by_name(sheet_name)
+
+        rows = self.get_rows(3, worksheet=worksheet)
+        # aliquot_gen = AliquotSample()
+        for row in rows:
+            self.create_biospecimen(project, batch_uid, row)
+
+    def create_biospecimen(self, project, batch_uid, row):
+        barcode = row.get('Barcode')
+        if not barcode:
+            raise ()
+        sample_type = self.get_sample_type(row.get('SampleType', ''))
+        if not sample_type:
+            raise()
+
+        volume = self.get_volume(row.get('Volume', ''))
+
+        obj = _createObjectByType('Sample', project, tmpID())
+        field_b = obj.getField('Batch')
+        field_b.set(obj, batch_uid)
+
+        self.complete_biospecimen(obj, sample_type, barcode, volume, row)
+
+    def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
+        try:
+            st_loc_list = self._pc(portal_type='StoragePosition', Title=row.get('StorageLocation', ''))
+            storage_location = st_loc_list and st_loc_list[0].getObject() or None
+
+            obj.edit(
+                title=row.get('title'),
+                description=row.get('description'),
+                Project=project,
+                SampleType=sample_type,
+                StorageLocation=storage_location,
+                SubjectID=row.get('SubjectID'),
+                Barcode=barcode,
+                Volume=volume,
+                Unit=row.get('Unit'),
+                BabyNumber=row.get('BabyNo', ''),
+                # LinkedSample=linked_sample,
+                DateCreated=row.get('DateCreated'),
+                # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+                # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+            )
+
+            obj.reindexObject()
+
+            obj.unmarkCreationFlag()
+            renameAfterCreation(obj)
+
+            from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+            ObjectInitializedEventHandler(obj, None)
+        except Exception as e:
+            print('Exception is %s' % str(e))
+
+    def get_volume(self, row_volume):
+        try:
+            volume = str(row_volume)
+            float_volume = float(volume)
+            if not float_volume:
+                raise ()
+            return str(float_volume)
+        except Exception as e:
+            raise ()
+
+    def get_sample_type(self, row_sample_type):
+        sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)
+        sample_type = sampletype_list and sampletype_list[0].getObject() or None
+        return sample_type
+
+
+    def getStorageLocations(self, sheet_locations):
+
+        sheet_locations = sheet_locations.split(',')
+        print(sheet_locations)
+        storage_positions = []
+
+        for sheet_location in sheet_locations:
+            try:
+                location_brains = self._pc(portal_type='StoragePosition', Title=sheet_location)
+                if location_brains:
+                    for brain in location_brains:
+                        storage_positions.append(brain.getObject())
+            except:
+                continue
+
+        boxes = []
+        for storage_position in storage_positions:
+            if storage_position.aq_parent not in boxes:
+                boxes.append(storage_position.aq_parent)
+
+        return boxes, storage_positions
+
+
+# class AliquotSample(SampleImport):
+#     """ Import biospecimens
+#     """
+#
+#     # def Import(self, aliquot_sheet_name, parent_sample):
+#     #
+#     #     worksheet = self.workbook.get_sheet_by_name(aliquot_sheet_name)
+#     #     if not worksheet:
+#     #         return
+#     #
+#     #     for row in self.get_rows(3, worksheet=self.interim_worksheet):
+#     #         create_sample(row, project, parent_sample)
+#     #
+#
+#     def __init__(self):
+#         self._pc = getToolByName(self.context, 'portal_catalog')
+#         self._bc = getToolByName(self.context, 'bika_catalog')
+#
+#     def create_biospecimen(self, batch_uid, row):
+#         print("===create aliquot===1")
+#         barcode = row.get('Barcode')
+#         if not barcode:
+#             raise ()
+#         print("===create aliquot===2")
+#         project = self.get_project(row.get('Project', ''))
+#         if not project:
+#             raise()
+#         print("===create aliquot===3")
+#         sample_type = self.get_sample_type(row.get('SampleType', ''))
+#         if not sample_type:
+#             raise()
+#         print("===create aliquot===4")
+#         volume = self.get_volume(row.get('Volume', ''))
+#         print("===create aliquot===5")
+#         obj = _createObjectByType('Sample', project, tmpID())
+#         print("===create aliquot===6")
+#         field_b = obj.getField('Batch')
+#         field_b.set(obj, batch_uid)
+#         print("===create aliquot===7")
+#         self.complete_biospecimen(obj, sample_type, barcode, volume, row)
+#         print("===create aliquot===8")
+#     def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
+#         storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+#
+#         obj.edit(
+#             title=row.get('title'),
+#             description=row.get('description'),
+#             Project=project,
+#             SampleType=sample_type,
+#             StorageLocation=storage_location,
+#             SubjectID=row.get('SubjectID'),
+#             Barcode=barcode,
+#             Volume=volume,
+#             Unit=row.get('Unit'),
+#             BabyNumber=row.get('BabyNo', ''),
+#             # LinkedSample=linked_sample,
+#             DateCreated=row.get('DateCreated'),
+#             # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+#             # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+#         )
+#
+#         obj.reindexObject()
+#
+#         obj.unmarkCreationFlag()
+#         renameAfterCreation(obj)
+#
+#         from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+#         ObjectInitializedEventHandler(obj, None)
+
+
+
+
+
+#
+#
+#     def create_aliquots(self, project, parent_sample, aliquot_sheet_name):
+#
+#         worksheet = self.workbook.get_sheet_by_name(aliquot_sheet_name)
+#         if not worksheet:
+#             return
+#
+#         pc = getToolByName(self.context, 'portal_catalog')
+#         bc = getToolByName(self.context, 'bika_catalog')
+#
+#         for row in self.get_rows(3, worksheet=self.interim_worksheet):
+#             create_sample(row, 'aliquot', project, parent_sample)
+#
+#
+# def create_sample(row, aliquot_or_parent, project, sample_type, parent_sample=None):
+#     # get the project
+#     # project_list = pc(portal_type="Project", Title=row.get('Project'))
+#     # project = project_list and project_list[0].getObject() or None
+#     # if not project: raise ()
+#
+#     # sampletype_list = pc(portal_type="SampleType", Title=row.get('SampleType'))
+#     # sample_type = sampletype_list and sampletype_list[0].getObject() or None
+#     # if not sample_type: raise ()
+#
+#     # if aliquot_or_parent == 'parent':
+#     #     linked_sample_list = pc(portal_type="Sample", Title=row.get('LinkedSample', ''))
+#     #     linked_sample = linked_sample_list and linked_sample_list[0].getObject() or None
+#
+#     barcode = row.get('Barcode')
+#     if not barcode:
+#         raise ()
+#
+#     try:
+#         volume = str(row.get('Volume'))
+#         float_volume = float(volume)
+#         if not float_volume:
+#             raise ()
+#     except:
+#         raise ()
+#
+#     obj = _createObjectByType('Sample', project, tmpID())
+#
+#     st_loc_list = pc(portal_type='StoragePosition', Title=row.get('StorageLocation'))
+#     storage_location = st_loc_list and st_loc_list[0].getObject() or None
+#
+#     obj.edit(
+#         title=row.get('title'),
+#         description=row.get('description'),
+#         Project=project,
+#         SampleType=sample_type,
+#         StorageLocation=storage_location,
+#         SubjectID=row.get('SubjectID'),
+#         Barcode=barcode,
+#         Volume=volume,
+#         Unit=row.get('Unit'),
+#         LinkedSample=parent_sample,
+#         DateCreated=row.get('DateCreated'),
+#         # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+#         # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+#     )
+#
+#     obj.unmarkCreationFlag()
+#     renameAfterCreation(obj)
+#
+#     from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+#     ObjectInitializedEventHandler(obj, None)
+
+
 class Biospecimens(WorksheetImporter):
     """ Import biospecimens
     """
