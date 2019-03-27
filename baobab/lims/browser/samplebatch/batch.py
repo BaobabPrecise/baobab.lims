@@ -69,8 +69,8 @@ class BatchView(BrowserView):
 
         self.subjectID = context.getField('SubjectID').get(context)
         self.project = "<a href='%s'>%s</a>" % (
-            context.aq_parent.absolute_url(),
-            context.aq_parent.Title()
+            context.getProject().absolute_url(),
+            context.getProject().Title()
         )
 
         self.numberOfBiospecimen = context.getQuantity()
