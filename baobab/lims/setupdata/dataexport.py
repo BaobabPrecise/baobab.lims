@@ -4,6 +4,8 @@ from Products.Archetypes.public import DisplayList
 from zope.interface import implements
 from zope.component import getAdapters
 from pkg_resources import *
+
+from baobab.lims.setupdata.exporters import SamplesExporter
 from bika.lims import bikaMessageFactory as _
 from bika.lims.exportimport.load_setup_data import LoadSetupData
 from bika.lims.exportimport.dataimport import ImportView as IV
@@ -31,39 +33,39 @@ class ExportView(IV):
 
     def __call__(self):
         if 'submitted' in self.request:
-
-            # Good example of lab data is found in baobab/lims/browser/__init__.py
             lab = self.context.bika_setup.laboratory
-            # print('======This is the lab===========')
-            # print(lab.__dict__)
-
-
-            # try:
-            export_data = self.export_data()
-
-            excel_writer = ExcelWriter()
-            excel_writer.write_output(export_data)
+            # import pdb
+            # pdb.set_trace()
+            # self.context.portal_url
+            self.excel_writer = ExcelWriter()
+            self.export_data()
 
             self.download_file = True
+            self.files = self.get_filenames()
             self.context.plone_utils.addPortalMessage('Export successfully completed.')
-
-            # except Exception as e:
-            #     self.submit_button = True
-            #     self.context.plone_utils.addPortalMessage(str(e), 'error')
         else:
             self.submit_button = True
-
         return self.template()
 
-    def export_data(self):
+    def get_filenames(self):
+        from os import listdir
+        from os.path import isfile, join, getmtime
+        path = 'src/baobab.lims/baobab/lims/static/downloads/'
+        files = [f for f in listdir(path) if isfile(join(path, f))]
+        files.sort(key=lambda x: getmtime(join(path, x)), reverse=True)
+        return files
 
-        export_data = {}
+    def export_data(self):
+        exporter = SamplesExporter(self.context)
+        data = exporter.export()
+        self.excel_writer.write_output("Parent Samples", data)
 
         # # get the lab
         # lab_data_exporter = LabDataExporter(self.context)
         # lab_data_headings, lab_data = lab_data_exporter.export()
         # export_data['LabData'] = (lab_data_headings, lab_data)
-        #
+        # self.excel_writer.write_output(export_data['LabData'])
+
         # # get the lab contacts
         # lab_contacts_exporter = LabContactsExporter(self.context)
         # lab_contacts_headings, lab_contacts_data = lab_contacts_exporter.export()
@@ -95,13 +97,9 @@ class ExportView(IV):
         # export_data['Projects'] = (project_headings, project_data)
 
         # get the batch samples
-        batch_sample_exporter = SampleBatchesExporter(self.context)
-        batch_sample_headings, batch_sample_data = batch_sample_exporter.export()
-        export_data['Batch Samples'] = (batch_sample_headings, batch_sample_data)
+        # batch_sample_exporter = SampleBatchesExporter(self.context)
+        # batch_sample_headings, batch_sample_data = batch_sample_exporter.export()
+        # export_data['Batch Samples'] = (batch_sample_headings, batch_sample_data)
 
-        # # get the samples
-        # sample_exporter = SamplesExporter(self.context)
-        # sample_headings, sample_data = sample_exporter.export()
-        # export_data['Biospecimens'] = (sample_headings, sample_data)
 
-        return export_data
+        #return export_data

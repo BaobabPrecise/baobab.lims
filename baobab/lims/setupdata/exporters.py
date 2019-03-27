@@ -638,90 +638,39 @@ class SampleBatchesExporter(object):
 
 class SamplesExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
+        Returns all the samples except Aliquots (Samples with Parent Samples/LinkedSample)
     """
-
     def __init__(self, context):
         self.context = context
 
     def export(self):
-        list_of_samples = []
-
+        samples = []
         pc = getToolByName(self.context, 'portal_catalog')
-        sample_brains = pc(portal_type="Sample")
-        print('===brains========')
+        brains = pc(portal_type="Sample")
+        if brains:
+            samples.append(['Title', 'Project (or Visit type)', 'Sample Type','Storage Location', 'Sampling Date',
+                            'Subject ID', 'Barcode (or Kit ID)', 'Volume', 'Unit', 'Baby No.', 'Date Created'])
 
-        for brain in sample_brains:
+        for brain in brains:
             sample = brain.getObject()
-            # print('-------------------')
-            # print(sample.__dict__)
-            dict = {}
-            dict['Title'] = sample.Title()
-            dict['Description'] = sample.Description()
-            project = sample.getField('Project').get(sample)
-            try:
-                dict['Project'] = project.Title()
-            except:
-                dict['Project'] = ''
-            dict['Volume'] = sample.getField('Volume').get(sample)
-            dict['Unit'] = sample.getField('Unit').get(sample)
-            dict['AllowSharing'] = sample.getField('AllowSharing').get(sample)
-            dict['Kit'] = sample.getField('Kit').get(sample)
-            storage = sample.getField('StorageLocation').get(sample)
-            try:
-                dict['StorageLocation'] = storage.getHierarchy()
-            except:
-                dict['StorageLocation'] = ''
-            dict['SubjectID'] = sample.getField('SubjectID').get(sample)
-            dict['Barcode'] = sample.getField('Barcode').get(sample)
-            linked_sample = sample.getField('LinkedSample').get(sample)
-            try:
-                dict['LinkedSample'] = linked_sample.Title()
-            except:
-                dict['LinkedSample'] = ''
-            sample_donor = sample.getField('Donor').get(sample)
-            try:
-                dict['SampleDonor'] = sample_donor.Title()
-            except:
-                dict['SampleDonor'] = ''
-            disease_ontology = sample.getField('DiseaseOntology').get(sample)
-            try:
-                dict['DiseaseOntology'] = disease_ontology.Title()
-            except:
-                dict['DiseaseOntology'] = ''
-            dict['AnatomicalSiteTerm'] = sample.getField('AnatomicalSiteTerm').get(sample)
-            dict['AnatomicalSiteDescription'] = sample.getField('AnatomicalSiteDescription').get(sample)
-            dict['UID'] = sample.UID()
-            try:
-                dict['Parent_UID'] = sample.aq_parent.UID()
-            except:
-                dict['Parent_UID'] = ''
+            if sample.getField('LinkedSample').get(sample):
+                row = []
+                row.append(sample.Title())
+                project = sample.getField('Project').get(sample)
+                row.append(project.Title())
+                row.append(sample.getSampleType().Title())
+                storage = sample.getField('StorageLocation').get(sample)
+                row.append(storage.getHierarchy())
+                row.append(sample.getSamplingDate())
+                row.append(sample.getField('SubjectID').get(sample))
+                row.append(sample.getField('Barcode').get(sample))
+                row.append(sample.getField('Volume').get(sample))
+                row.append(sample.getField('Unit').get(sample))
+                row.append(sample.getField('BabyNumber').get(sample))
+                row.append(sample.getField('DateCreated').get(sample))
 
-            list_of_samples.append(dict)
-
-        return self.get_headings(), list_of_samples
-
-    def get_headings(self):
-        headings = [
-            'Title',
-            'Description',
-            'Project',
-            'Volume',
-            'Unit',
-            'AllowSharing',
-            'Kit',
-            'StorageLocation',
-            'SubjectID',
-            'Barcode',
-            'LinkedSample',
-            'SampleDonor',
-            'DiseaseOntology',
-            'AnatomicalSiteTerm',
-            'AnatomicalSiteDescription',
-            'UID',
-            'Parent_UID',
-        ]
-
-        return headings
+                samples.append(row)
+        return samples
 
 class AnalysisRequestsExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
