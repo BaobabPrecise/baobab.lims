@@ -1,3 +1,7 @@
+import plone
+import os
+import json
+
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from plone.app.layout.globals.interfaces import IViewView
 from Products.Archetypes.public import DisplayList
@@ -17,8 +21,26 @@ from Products.CMFCore.utils import getToolByName
 from exporters import *
 from excelwriter import ExcelWriter
 
-import plone
+from bika.lims.browser import BrowserView
 
+class RemoveExports(BrowserView):
+    def __init__(self, context, request):
+
+        super(RemoveExports, self).__init__(context, request)
+        self.context = context
+        self.request = request
+
+    def __call__(self):
+        uc = getToolByName(self.context, 'portal_catalog')
+        doc_id = self.request.form['id']
+
+        filename = 'src/baobab.lims/baobab/lims/static/downloads/' + doc_id
+        if os.path.exists(filename):
+            os.remove(filename)
+
+        return json.dumps({
+            'row_id': doc_id
+        })
 
 class ExportView(IV):
     """

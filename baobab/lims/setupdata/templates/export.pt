@@ -36,31 +36,34 @@
             <tbody tal:define="files view/get_filenames">
             <span tal:repeat="file files">
                 <div tal:omit-tag="" tal:define="myindex python:repeat['file'].index">
-                <tr>
-                    <td i18n:translate="" rowspan="1" colspan="1">
-                         <b tal:omit-tag="python:myindex!=0"> <span tal:content="file"></span></b>
-                    </td>
-                    <td i18n:translate="Link">
-                        <a href=""  tal:attributes="href string:$portal_url/++resource++baobab.lims.downloads/$file" download>
-                          Download
-                        </a>
-                        |
-                        <a href="#" tal:attributes="id string:$file" class="deleteExportLink">Delete</a>
-                        <span class="deleteExportConfirmation" style="display: none">
-                            <a href="#" tal:attributes="id string:$file" class="deleteExport">Yes</a> or
-                            <a href="#"  class="cancelDeleteExport">Cancel</a>
-                        </span>
-                    </td>
-                </tr>
-                <tr tal:condition="python:myindex == 0">
-                    <td><br /></td>
-                    <td><br /></td>
-                </tr>
-                <tr tal:condition="python:myindex == 0">
-                    <td>
-                        <span style="position:relative;top:-0.2em;" class="documentFirstHeading"><b>Previous Exports</b> </span>
-                    </td>
-                    <td></td></tr>
+                    <tr tal:attributes="id string:${file}_tr">
+                        <td i18n:translate="" rowspan="1" colspan="1">
+                             <b tal:omit-tag="python:myindex!=0"> <span tal:content="file"></span></b>
+                        </td>
+                        <td i18n:translate="Link">
+                            <div class="exportActionLinks">
+                                <a href=""  tal:attributes="href string:$portal_url/++resource++baobab.lims.downloads/$file" download>
+                                  Download
+                                </a>
+                                <a href="#" tal:attributes="id string:$file" tal:condition="python:myindex != 0" class="deleteExportLink"> | Delete</a>
+                            </div>
+                            <div class="deleteExportConfirmation" style="display: none">
+                                <a href="#" tal:attributes="id string:$file" class="deleteExportCornfirmed">Yes</a> or
+                                <a href="#"  class="cancelDeleteExport">Cancel</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr tal:condition="python:myindex == 0">
+                        <td><br /></td>
+                        <td><br /></td>
+                    </tr>
+                    <tr tal:condition="python:myindex == 0">
+                        <td>
+                            <span style="position:relative;top:-0.2em;" class="documentFirstHeading"><b>Previous Exports</b> </span>
+                        </td>
+                        <td></td>
+                    </tr>
                 </div>
             </span>
             </tbody>
