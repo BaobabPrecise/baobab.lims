@@ -18,22 +18,25 @@ def generateUniqueId(context, edit=False):
 
     elif context.portal_type == "SampleBatch":
 
-        subject_id = context.getSubjectID()
-        date_created = context.getDateCreated().strftime('%g%m%d')
+        if context.getBatchId():
+            id = context.getBatchId()
+        else:
+            subject_id = context.getSubjectID()
+            date_created = context.getDateCreated().strftime('%g%m%d')
 
-        if edit and not isSubjectOrDateModified(context, subject_id, date_created):
-            return None
+            if edit and not isSubjectOrDateModified(context, subject_id, date_created):
+                return None
 
-        bc = getToolByName(context, 'bika_catalog')
-        brains = bc(portal_type="SampleBatch", getSubjectID=subject_id)
-        suffix = '1'
-        prefix = subject_id + '-' + date_created
-        suffixes = [int(brain.id.split('-')[-1]) for brain in brains if brain.id.startswith(prefix)]
-        if suffixes:
-            suffix = str(max(suffixes) + 1)
+            bc = getToolByName(context, 'bika_catalog')
+            brains = bc(portal_type="SampleBatch", getSubjectID=subject_id)
+            suffix = '1'
+            prefix = subject_id + '-' + date_created
+            suffixes = [int(brain.id.split('-')[-1]) for brain in brains if brain.id.startswith(prefix)]
+            if suffixes:
+                suffix = str(max(suffixes) + 1)
 
-        id = prefix + '-' + suffix
-        context.title = prefix + '-' + suffix
+            id = prefix + '-' + suffix
+            context.title = prefix + '-' + suffix
 
         return id
 

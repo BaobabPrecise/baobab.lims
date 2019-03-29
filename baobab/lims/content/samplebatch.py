@@ -35,14 +35,14 @@ class BatchTypeVocabulary(object):
 
         return DisplayList(batch_types)
 
-# BatchId = StringField(
-#     'BatchId',
-#     widget=StringWidget(
-#         label=_('BatchId'),
-#         description=_('Specify a batchId in order to differentiate this batch from others.'),
-#         visible={'view': 'visible', 'edit': 'visible'}
-#     )
-# )
+BatchId = StringField(
+    'BatchId',
+    widget=StringWidget(
+        label=_('BatchId'),
+        description=_('Specify a batchId in order to differentiate this batch from others.'),
+        visible={'view': 'invisible', 'edit': 'invisible'}
+    )
+)
 
 BatchType = StringField(
     'BatchType',
@@ -212,6 +212,7 @@ CfgDateTime = DateTimeField(
 )
 
 schema = BikaSchema.copy() + Schema((
+    BatchId,
     BatchType,
     Project,
     Subject_ID,
