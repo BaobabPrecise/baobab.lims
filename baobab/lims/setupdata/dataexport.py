@@ -9,7 +9,7 @@ from zope.interface import implements
 from zope.component import getAdapters
 from pkg_resources import *
 
-from baobab.lims.setupdata.exporters import SamplesExporter
+from baobab.lims.setupdata.exporters import SamplesExporter, SampleBatchesExporter
 from bika.lims import bikaMessageFactory as _
 from bika.lims.exportimport.load_setup_data import LoadSetupData
 from bika.lims.exportimport.dataimport import ImportView as IV
@@ -56,9 +56,6 @@ class ExportView(IV):
     def __call__(self):
         if 'submitted' in self.request:
             lab = self.context.bika_setup.laboratory
-            # import pdb
-            # pdb.set_trace()
-            # self.context.portal_url
             self.excel_writer = ExcelWriter()
             self.export_data()
 
@@ -78,9 +75,24 @@ class ExportView(IV):
         return files
 
     def export_data(self):
+        export_dict = {}
+        # get the batch samples
+        batch_sample_exporter = SampleBatchesExporter(self.context)
+        export_dict['SampleBatch'] = batch_sample_exporter.export()
+
         exporter = SamplesExporter(self.context)
-        data = exporter.export()
-        self.excel_writer.write_output("Parent Samples", data)
+        export_dict['ParentSamples'] = exporter.export()
+
+        self.excel_writer.write_output(export_dict)
+
+
+        # get the aliquots
+        # batch_sample_exporter = SampleBatchesExporter(self.context)
+        # batch_sample_headings, batch_sample_data = batch_sample_exporter.export()
+        # export_data['Batch Samples'] = (batch_sample_headings, batch_sample_data)
+
+        # get the boxmovements
+
 
         # # get the lab
         # lab_data_exporter = LabDataExporter(self.context)

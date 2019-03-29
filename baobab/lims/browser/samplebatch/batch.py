@@ -69,8 +69,8 @@ class BatchView(BrowserView):
 
         self.subjectID = context.getField('SubjectID').get(context)
         self.project = "<a href='%s'>%s</a>" % (
-            context.aq_parent.absolute_url(),
-            context.aq_parent.Title()
+            context.getProject().absolute_url(),
+            context.getProject().Title()
         )
 
         self.numberOfBiospecimen = context.getQuantity()
@@ -196,18 +196,13 @@ class EditView(BrowserView):
             sample.getField('SamplingDate').set(sample, parent_sampling_date)
             samples.append(sample)
 
-        # location_uid = form.get('StorageLocation_uid', '')
-        #
-        # storage = []
-        # if location_uid:
-        #     location = uc(UID=location_uid)[0].getObject()
-        #     if len(location.get_free_positions()) > 0:
-        #         storage.append(location)
-
         storages = self.get_biospecimen_storages()
 
         if storages:
             samples_gen.store_samples(samples, storages)
+
+        for storage in storages:
+            storage.reindexObject()
 
         return samples
 

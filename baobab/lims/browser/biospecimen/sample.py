@@ -1,3 +1,5 @@
+from zope.schema import ValidationError
+
 from Products.CMFCore.utils import getToolByName
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from bika.lims.workflow import doActionFor
@@ -111,10 +113,18 @@ class EditView(BrowserView):
     def __call__(self):
         request = self.request
         context = self.context
+        self.form = request.form
 
         if 'submitted' in request:
             from Products.CMFPlone.utils import _createObjectByType
             from bika.lims.utils import tmpID
+
+            try:
+                self.validate_form_input()
+            except ValidationError as e:
+                self.form_error(e.message)
+                return
+
             pc = getToolByName(context, "portal_catalog")
             parent = context.aq_parent
 
@@ -151,15 +161,15 @@ class EditView(BrowserView):
             sample_batch = sample.getField('Batch').get(sample)
             sample.processForm()
 
-            units = []
-            registry = queryUtility(IRegistry)
-            if registry is not None:
-                for unit in registry.get('baobab.lims.biospecimen.units', ()):
-                    units.append(unit)
-                units.append(unicode(request.form['Unit']))
-            unit_tuple = tuple(units)
+            #units = []
+            #registry = queryUtility(IRegistry)
+            #if registry is not None:
+            #    for unit in registry.get('baobab.lims.biospecimen.units', ()):
+            #        units.append(unit)
+            #    units.append(unicode(request.form['Unit']))
+            #unit_tuple = tuple(units)
 
-            registry.records.get('baobab.lims.biospecimen.units')._set_value(unit_tuple)
+            #registry.records.get('baobab.lims.biospecimen.units')._set_value(unit_tuple)
 
             sample.getField('Batch').set(sample, sample_batch)
 
@@ -168,6 +178,18 @@ class EditView(BrowserView):
             return
 
         return self.template()
+
+    def validate_form_input(self):
+        subject_id = self.form.get('SubjectID')
+        if not subject_id:
+            raise ValidationError(['Subject ID cannot be empty!'])
+        sampling_date = self.form.get('SamplingDate')
+        if not sampling_date:
+            raise ValidationError(['Sampling Date cannot be empty!'])
+
+    def form_error(self, msg):
+        self.context.plone_utils.addPortalMessage(msg)
+        self.request.response.redirect(self.context.absolute_url())
 
     def get_fields_with_visibility(self, visibility, mode=None):
         mode = mode if mode else 'edit'

@@ -11,14 +11,16 @@ class ExcelWriter(object):
         self.bold = self.workbook.add_format({'bold': True})
 
 
-    def write_output(self, sheet_name, data):
-        work_sheet = self.workbook.add_worksheet(sheet_name)
+    def write_output(self, worksheet_data):
 
-        for i, row in enumerate(data):
-            if i == 0:
-                work_sheet.write_row(i, 0, row, self.bold)
-            else:
-                work_sheet.write_row(i, 0, row)
+        for sheet_name, sheet_data in worksheet_data:
+            work_sheet = self.workbook.add_worksheet(sheet_name)
+
+            for i, row in enumerate(sheet_data):
+                if i == 0:
+                    work_sheet.write_row(i, 0, row, self.bold)
+                else:
+                    work_sheet.write_row(i, 0, row)
 
         self.workbook.close()
 

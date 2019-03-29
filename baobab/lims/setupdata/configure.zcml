@@ -88,4 +88,22 @@
       provides="bika.lims.interfaces.ISetupDataImporter"
       for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
 
+    <adapter
+      name="ParentSample"
+      factory="baobab.lims.setupdata.ParentSample"
+      provides="bika.lims.interfaces.ISetupDataImporter"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+
+    <adapter
+      name="AliquotSample"
+      factory="baobab.lims.setupdata.AliquotSample"
+      provides="bika.lims.interfaces.ISetupDataImporter"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+
+     <adapter
+      name="SampleBatch"
+      factory="baobab.lims.setupdata.SampleBatch"
+      provides="bika.lims.interfaces.ISetupDataImporter"
+      for="Products.CMFPlone.interfaces.IPloneSiteRoot"/>
+
 </configure>

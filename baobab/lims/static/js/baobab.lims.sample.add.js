@@ -51,20 +51,14 @@ function BaobabSampleView() {
 
         // console.log('========================')
         var path = window.location.href.split('edit')[0] + '/get_sample_dates';
-        // console.log(path)
-        var title = $('#breadcrumbs-current').text()
-        // console.log(title)
+        var uid = $('#archetypes-fieldname-SampleType').attr('data-uid');
 
-        // var path = window.location.href.split('/base_view')[0] + '/retrieve_date_times';
         $.ajax({
             type: 'GET',
             dataType: 'json',
             url: path,
-            data: {'title': title}
+            data: {UID: uid}
         }).done(function (data) {
-            // console.log('-----------')
-            // console.log(data);
-
             var sampling_date = data['sampling_date']
             if (sampling_date) {
                 var final_sampling_date = getDatePickerDateAndTime(sampling_date)

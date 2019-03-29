@@ -555,85 +555,34 @@ class ProjectsExporter(object):
 class SampleBatchesExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
     """
-
     def __init__(self, context):
         self.context = context
 
     def export(self):
-        list_of_sample_batches = []
-
+        sample_batch = []
         bc = getToolByName(self.context, 'bika_catalog')
-        sample_batch_brains = bc(portal_type="SampleBatch")
-        # print('===brains========')
-
-        for brain in sample_batch_brains:
+        brains = bc(portal_type="SampleBatch")
+        import pdb
+        pdb.set_trace()
+        if brains:
+            sample_batch.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType', 'StorageLocations', 'DateCreated',
+                                    'SerumColour', 'CfgDateTime', 'Quantity'])
+        for brain in brains:
             sample_batch = brain.getObject()
-            # print('-------------------')
-            # print(sample.__dict__)
-            dict = {}
-            dict['Title'] = sample_batch.Title()
-            dict['Description'] = sample_batch.Description()
-            dict['BatchId'] = sample_batch.getField('BatchId').get(sample_batch)
-            project = sample_batch.getField('Project').get(sample_batch)
-            try:
-                dict['Project'] = project.Title()
-            except:
-                dict['Project'] = ''
-
-            linked_sample = sample_batch.getField('ParentBiospecimen').get(sample_batch)
-            try:
-                dict['ParentBiospecimen'] = linked_sample.Title()
-            except:
-                dict['ParentBiospecimen'] = ''
-
-            storage = sample_batch.getField('StorageLocation').get(sample_batch)
-
-            try:
-                dict['StorageLocation'] = storage.getHierarchy()
-            except:
-                dict['StorageLocation'] = ''
-
-            print_samples = []
-            pc = getToolByName(self.context, 'portal_catalog')
-            sample_brains = pc(portal_type='Sample', Batch=sample_batch.UID())
-            for sample_brain in sample_brains:
-                sample = sample_brain.getObject()
-                # hack that is needed because stupid Plone cant search for the batch in a sample
-                # it returns every bloody sample even though I specify the batch in the search.
-                this_sample_batch = sample.getField('Batch').get(sample)
-                if this_sample_batch and this_sample_batch.UID() == sample_batch.UID():
-                    print('Batch is %s' % sample.getField('Batch').get(sample))
-                    print_samples.append(sample.getField('Barcode').get(sample))
-            dict['Samples'] = ', '.join(str(x) for x in print_samples)
-            dict['DateCreated'] = sample_batch.getField('DateCreated').get(sample_batch)
-
-            dict['UID'] = sample_batch.UID()
-            try:
-                dict['Parent_UID'] = sample_batch.aq_parent.UID()
-            except:
-                dict['Parent_UID'] = ''
-
-            # todo: also get the samples barcodes and publish them
-
-            list_of_sample_batches.append(dict)
-
-        return self.get_headings(), list_of_sample_batches
-
-    def get_headings(self):
-        headings = [
-            'Title',
-            'Description',
-            'BatchId',
-            'Project',
-            'ParentBiospecimen',
-            'DateCreated',
-            # 'StorageLocations'
-            'Samples',
-            'UID',
-            'Parent_UID',
-        ]
-
-        return headings
+            if sample_batch:
+                row = []
+                row.append(sample_batch.Title())
+                row.append(sample_batch.getSubjectID())
+                row.append(sample_batch.getParentBiospecimen())
+                row.append(sample_batch.getBatchID())
+                row.append(sample_batch.getBatchType())
+                row.append(sample_batch.geStorageLocations())
+                row.append(sample_batch.getDateCreated())
+                row.append(sample_batch.getSerumColour())
+                row.append(sample_batch.getCfgDateTime())
+                row.append(sample_batch.getQuantity())
+                sample_batch.append(row)
+        return sample_batch
 
 
 class SamplesExporter(object):

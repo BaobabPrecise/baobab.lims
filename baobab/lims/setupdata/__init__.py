@@ -298,6 +298,281 @@ class Projects(WorksheetImporter):
             renameAfterCreation(obj)
 
 
+class SampleImport(WorksheetImporter):
+    """ Import biospecimens
+    """
+
+    def Import(self):
+
+        self._pc = getToolByName(self.context, 'portal_catalog')
+        self._bc = getToolByName(self.context, 'bika_catalog')
+
+        rows = self.get_rows(3)
+        for row in rows:
+            self.create_biospecimen(row)
+
+    def get_storage_location(self, row_storage_location):
+        st_loc_list = self._pc(portal_type='StoragePosition', Title=row_storage_location)
+        storage_location = st_loc_list and st_loc_list[0].getObject() or None
+        return storage_location
+
+    def get_project(self, row_project):
+        project_list = self._pc(portal_type="Project", Title=row_project)
+        project = project_list and project_list[0].getObject() or None
+        return project
+
+    def get_sample_type(self, row_sample_type):
+        sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)
+        sample_type = sampletype_list and sampletype_list[0].getObject() or None
+        return sample_type
+
+    def get_linked_sample(self, row_linked_sample):
+        linked_sample_list = self._pc(portal_type="Sample", Title=row_linked_sample)
+        linked_sample = linked_sample_list and linked_sample_list[0].getObject() or None
+        return linked_sample
+
+
+    def get_volume(self, row_volume):
+        try:
+            volume = str(row_volume)
+            float_volume = float(volume)
+            if not float_volume:
+                raise ()
+            return str(float_volume)
+        except Exception as e:
+            print('Error has been found : %s' % str(e))
+            raise ()
+
+
+class ParentSample(SampleImport):
+    """ Import biospecimens
+    """
+
+    def create_biospecimen(self, row):
+        barcode = str(row.get('Barcode'))
+        project = self.get_project(row.get('Project', ''))
+        sample_type = self.get_sample_type(row.get('SampleType', ''))
+        volume = self.get_volume(row.get('Volume', ''))
+        obj = _createObjectByType('Sample', project, tmpID())
+        self.complete_biospecimen(obj, sample_type, barcode, volume, row)
+
+    def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
+        title = row.get('title', barcode)
+        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+
+        obj.edit(
+            title=title,
+            description=row.get('description'),
+            Project=project,
+            SampleType=sample_type,
+            StorageLocation=storage_location,
+            SubjectID=row.get('SubjectID'),
+            Barcode=barcode,
+            Volume=volume,
+            Unit=row.get('Unit'),
+            BabyNumber=row.get('BabyNo', ''),
+            DateCreated=row.get('DateCreated'),
+            # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+            # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+        )
+
+        obj.reindexObject()
+
+        obj.unmarkCreationFlag()
+        renameAfterCreation(obj)
+
+        from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+        ObjectInitializedEventHandler(obj, None)
+
+class AliquotSample(SampleImport):
+    """ Import biospecimens
+    """
+
+    def create_biospecimen(self, row):
+        barcode = str(row.get('Barcode'))
+        batch_id = str(row.get('BatchID', ''))
+        brains = self._bc(portal_type='SampleBatch', Title=batch_id)
+
+        parent = self.get_linked_sample(str(row.get('Parent', '')))
+
+        project_obj = brains[0].getObject().getProject()
+
+        sample_type = self.get_sample_type(row.get('SampleType', ''))
+
+        volume = self.get_volume(row.get('Volume', ''))
+
+        obj = _createObjectByType('Sample', project_obj, tmpID())
+
+        field_b = obj.getField('Batch')
+        field_b.set(obj, brains[0].getObject())
+
+        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+
+        obj.edit(
+            title=row.get('title'),
+            description=row.get('description'),
+            Project=project_obj,
+            SampleType=sample_type,
+            StorageLocation=storage_location,
+            SubjectID=row.get('SubjectID'),
+            Barcode=barcode,
+            Volume=volume,
+            Unit=row.get('Unit'),
+            BabyNumber=row.get('BabyNo', ''),
+            LinkedSample=parent,
+            DateCreated=row.get('DateCreated'),
+            # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+            # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+        )
+
+        obj.reindexObject()
+
+        obj.unmarkCreationFlag()
+        renameAfterCreation(obj)
+
+        from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+        ObjectInitializedEventHandler(obj, None)
+
+
+class SampleBatch(WorksheetImporter):
+    """ Import biospecimens
+    """
+
+    def Import(self):
+        folder = self.context.samplebatches
+        rows = self.get_rows(3)
+
+        self._pc = getToolByName(self.context, 'portal_catalog')
+
+        for row in rows:
+            selected_project = row.get('Project', '')
+            #import pdb;pdb.set_trace()
+            project_list = self._pc(portal_type="Project", Title=selected_project)
+            project = project_list and project_list[0].getObject() or None
+            subject_id = row.get('SubjectID')
+            parent_biospecimen_list = self._pc(portal_type="Sample", Title=str(row.get('ParentBiospecimen', '')))
+            parent_biospecimen = parent_biospecimen_list and parent_biospecimen_list[0].getObject() or None
+
+            # TODO: VERIFY IT LATER
+            boxes = self.getStorageLocations(row.get('StorageLocations', ''))
+
+            batch_id = str(row.get('BatchID', ''))
+
+            obj = _createObjectByType('SampleBatch', folder, tmpID())
+
+            obj.edit(
+                title=batch_id,
+                Description=row.get('Description', ''),
+                BatchId=batch_id,
+                BatchType=row.get('BatchType', ''),
+                Project=project,
+                SubjectID=subject_id,
+                StorageLocation=boxes,
+                ParentBiospecimen=parent_biospecimen,
+                DateCreated=row.get('DateCreated', ''),
+                SerumColour=row.get('SerumColour', ''),
+                CfgDateTime=row.get('CfgDateTime', ''),
+            )
+            # import pdb;pdb.set_trace()
+            obj.reindexObject()
+            obj.unmarkCreationFlag()
+            renameAfterCreation(obj)
+
+    def get_sample_type(self, row_sample_type):
+        sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)
+        sample_type = sampletype_list and sampletype_list[0].getObject() or None
+        return sample_type
+
+
+    def getStorageLocations(self, locations):
+
+        locations = locations.split(',')
+        boxes = []
+        for location in locations:
+            title = location.split('.')[-1]
+            brains = self._pc(portal_type='ManagedStorage', Title=title)
+            for brain in brains:
+                if brain.getObject().getHierarchy() == location:
+                    boxes.append(brain.getObject())
+
+        return boxes
+
+
+
+
+
+
+
+
+#
+#
+#     def create_aliquots(self, project, parent_sample, aliquot_sheet_name):
+#
+#         worksheet = self.workbook.get_sheet_by_name(aliquot_sheet_name)
+#         if not worksheet:
+#             return
+#
+#         pc = getToolByName(self.context, 'portal_catalog')
+#         bc = getToolByName(self.context, 'bika_catalog')
+#
+#         for row in self.get_rows(3, worksheet=self.interim_worksheet):
+#             create_sample(row, 'aliquot', project, parent_sample)
+#
+#
+# def create_sample(row, aliquot_or_parent, project, sample_type, parent_sample=None):
+#     # get the project
+#     # project_list = pc(portal_type="Project", Title=row.get('Project'))
+#     # project = project_list and project_list[0].getObject() or None
+#     # if not project: raise ()
+#
+#     # sampletype_list = pc(portal_type="SampleType", Title=row.get('SampleType'))
+#     # sample_type = sampletype_list and sampletype_list[0].getObject() or None
+#     # if not sample_type: raise ()
+#
+#     # if aliquot_or_parent == 'parent':
+#     #     linked_sample_list = pc(portal_type="Sample", Title=row.get('LinkedSample', ''))
+#     #     linked_sample = linked_sample_list and linked_sample_list[0].getObject() or None
+#
+#     barcode = row.get('Barcode')
+#     if not barcode:
+#         raise ()
+#
+#     try:
+#         volume = str(row.get('Volume'))
+#         float_volume = float(volume)
+#         if not float_volume:
+#             raise ()
+#     except:
+#         raise ()
+#
+#     obj = _createObjectByType('Sample', project, tmpID())
+#
+#     st_loc_list = pc(portal_type='StoragePosition', Title=row.get('StorageLocation'))
+#     storage_location = st_loc_list and st_loc_list[0].getObject() or None
+#
+#     obj.edit(
+#         title=row.get('title'),
+#         description=row.get('description'),
+#         Project=project,
+#         SampleType=sample_type,
+#         StorageLocation=storage_location,
+#         SubjectID=row.get('SubjectID'),
+#         Barcode=barcode,
+#         Volume=volume,
+#         Unit=row.get('Unit'),
+#         LinkedSample=parent_sample,
+#         DateCreated=row.get('DateCreated'),
+#         # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
+#         # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+#     )
+#
+#     obj.unmarkCreationFlag()
+#     renameAfterCreation(obj)
+#
+#     from baobab.lims.subscribers.sample import ObjectInitializedEventHandler
+#     ObjectInitializedEventHandler(obj, None)
+
+
 class Biospecimens(WorksheetImporter):
     """ Import biospecimens
     """
@@ -411,15 +686,18 @@ class Storage(WorksheetImporter):
 
             if storage_type == 'ManagedStorage':
                 storage_obj.edit(
-                    XAxis=row.get('Rows'),
-                    YAxis=row.get('Columns'),
+                    XAxis=row.get('Columns'),
+                    YAxis=row.get('Rows'),
                 )
                 alsoProvides(storage_obj, ISampleStorageLocation)
 
-                for p in range(1, row.get('NumberOfPoints')+1):
+                nr_positions = row.get('NumberOfPoints')
+                for p in range(1, nr_positions+1):
+                    title = hierarchy + ".{id}".format(id=str(p).zfill(len(str(nr_positions))))
                     position = _createObjectByType('StoragePosition', storage_obj, str(p))
                     position.edit(
-                        title=hierarchy + ".{id}".format(id=p)
+                        # title=hierarchy + ".{id}".format(id=p)
+                        title=title
                     )
                     alsoProvides(position, ISampleStorageLocation)
                     position.reindexObject()

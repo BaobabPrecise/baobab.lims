@@ -111,8 +111,19 @@
           inline="False"
           insert-after="*"/>
 
- <javascript authenticated="True"
+  <javascript authenticated="True"
           id="++resource++baobab.lims.js/baobab.lims.exporttable.js"
+          cacheable="True"
+          compression="safe"
+          conditionalcomment=""
+          cookable="True"
+          enabled="on"
+          expression=""
+          inline="False"
+          insert-after="*"/>
+
+  <javascript authenticated="True"
+          id="++resource++baobab.lims.js/baobab.lims.boxmovement.add.js"
           cacheable="True"
           compression="safe"
           conditionalcomment=""
