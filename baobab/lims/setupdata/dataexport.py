@@ -1,3 +1,5 @@
+import collections
+
 import plone
 import os
 import json
@@ -9,7 +11,7 @@ from zope.interface import implements
 from zope.component import getAdapters
 from pkg_resources import *
 
-from baobab.lims.setupdata.exporters import SamplesExporter, SampleBatchesExporter
+from baobab.lims.setupdata.exporters import SamplesExporter, SampleBatchesExporter, SamplesAliquotExporter, BoxMovementExporter
 from bika.lims import bikaMessageFactory as _
 from bika.lims.exportimport.load_setup_data import LoadSetupData
 from bika.lims.exportimport.dataimport import ImportView as IV
@@ -75,16 +77,30 @@ class ExportView(IV):
         return files
 
     def export_data(self):
-        export_dict = {}
+        export_dict = collections.OrderedDict()
+
         # get the batch samples
+        exporter = SamplesExporter(self.context)
+        export_dict['Parent Samples'] = exporter.export()
+
+        # get the samples
         batch_sample_exporter = SampleBatchesExporter(self.context)
         export_dict['SampleBatch'] = batch_sample_exporter.export()
 
-        exporter = SamplesExporter(self.context)
-        export_dict['ParentSamples'] = exporter.export()
+        # get the aliquot samples
+        exporter = SamplesAliquotExporter(self.context)
+        export_dict['Aliquot'] = exporter.export()
+
+        # get the box-movement
+        exporter = BoxMovementExporter(self.context)
+        export_dict['Box Movement'] = exporter.export()
+
 
         self.excel_writer.write_output(export_dict)
 
+        # exporter = SamplesExporter(self.context)
+        # data = exporter.export()
+        # self.excel_writer.write_output("Parent Samples", data)
 
         # get the aliquots
         # batch_sample_exporter = SampleBatchesExporter(self.context)

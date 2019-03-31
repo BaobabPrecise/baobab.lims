@@ -559,31 +559,41 @@ class SampleBatchesExporter(object):
         self.context = context
 
     def export(self):
-        sample_batch = []
+        sample_batches = []
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
-        import pdb
-        pdb.set_trace()
         if brains:
-            sample_batch.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType', 'StorageLocations', 'DateCreated',
-                                    'SerumColour', 'CfgDateTime', 'Quantity'])
+            sample_batches.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
+                                 'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity'])
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
                 row = []
-                row.append(sample_batch.Title())
+                row.append(str(sample_batch.Title()))
                 row.append(sample_batch.getSubjectID())
-                row.append(sample_batch.getParentBiospecimen())
-                row.append(sample_batch.getBatchID())
+                row.append(sample_batch.getParentBiospecimen().Title())
+                row.append(str(sample_batch.getBatchId()))
                 row.append(sample_batch.getBatchType())
-                row.append(sample_batch.geStorageLocations())
-                row.append(sample_batch.getDateCreated())
-                row.append(sample_batch.getSerumColour())
-                row.append(sample_batch.getCfgDateTime())
-                row.append(sample_batch.getQuantity())
-                sample_batch.append(row)
-        return sample_batch
 
+                if sample_batch.getStorageLocation():
+                    locations = []
+                    for location in sample_batch.getStorageLocation():
+                        locations.append(str(location.getHierarchy()))
+                    row.append(','.join(locations))
+                else:
+                    row.append('')
+                if sample_batch.getDateCreated():
+                    row.append(sample_batch.getDateCreated().strftime("%Y/%m/%d %H:%M"))
+                else:
+                    row.append('')
+                row.append(sample_batch.getSerumColour())
+                if sample_batch.getCfgDateTime():
+                    row.append(sample_batch.getCfgDateTime().strftime("%Y/%m/%d %H:%M"))
+                else:
+                    row.append('')
+                row.append(sample_batch.getQuantity())
+                sample_batches.append(row)
+        return sample_batches
 
 class SamplesExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
@@ -609,7 +619,10 @@ class SamplesExporter(object):
                 row.append(project.Title())
                 row.append(sample.getSampleType().Title())
                 storage = sample.getField('StorageLocation').get(sample)
-                row.append(storage.getHierarchy())
+                if storage:
+                    row.append(storage.getHierarchy())
+                else:
+                    row.append('')
                 row.append(sample.getSamplingDate())
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
@@ -620,6 +633,81 @@ class SamplesExporter(object):
 
                 samples.append(row)
         return samples
+
+class SamplesAliquotExporter(object):
+    """ This class packages all the samples info into a list of dictionaries and then returns it.
+        Returns all the samples except Aliquots (Samples with Parent Samples/LinkedSample)
+    """
+    def __init__(self, context):
+        self.context = context
+
+    def export(self):
+        aliquots = []
+        pc = getToolByName(self.context, 'portal_catalog')
+        brains = pc(portal_type="Sample")
+        if brains:
+            aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Volume', 'Unit',
+                            'Storage', 'Centrifuge Start Time', 'Frozen Time', 'State', 'Sampling Time'])
+
+        for brain in brains:
+            sample = brain.getObject()
+            row = []
+            row.append(sample.Title())
+            row.append(sample.getSampleType().Title())
+            row.append(sample.getField('SubjectId').get(sample))
+            row.append(sample.getField('SampleId').get(sample))
+            row.append(sample.getField('Volume').get(sample))
+            row.append(sample.getField('Unit').get(sample))
+
+            storage = sample.getField('StorageLocation').get(sample)
+            if storage:
+                row.append(storage.getHierarchy())
+            else:
+                row.append('')
+
+            row.append(sample.getField('SamplingDate').get(sample))
+            row.append(sample.getField('CfgDateTime').get(sample))
+            row.append(sample.getField('').get(sample))
+
+            aliquots.append(row)
+        return aliquots
+
+class BoxMovementExporter(object):
+    """ This class packages all the samples info into a list of dictionaries and then returns it.
+        Returns all the samples except Aliquots (Samples with Parent Samples/LinkedSample)
+    """
+    def __init__(self, context):
+        self.context = context
+
+    def export(self):
+        box_movements = []
+        pc = getToolByName(self.context, 'portal_catalog')
+        brains = pc(portal_type="BoxMovement")
+        if brains:
+            box_movements.append(['Title', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved'])
+
+        for brain in brains:
+            box_move = brain.getObject()
+            row = []
+            row.append(box_move.Title())
+            old_storage = box_move.getField('StorageLocation').get(box_move)
+            if old_storage:
+                row.append(str(old_storage.getHierarchy()))
+            else:
+                row.append('')
+            row.append(box_move.getLabContact().Title())
+            new_location = box_move.getField('NewLocation').get(box_move)
+            if new_location:
+                row.append(str(new_location.getHierarchy()))
+            else:
+                row.append('')
+            if box_move.getDateCreated():
+                row.append(box_move.getDateCreated().strftime("%Y/%m/%d %H:%M"))
+            else:
+                row.append('')
+            box_movements.append(row)
+        return box_movements
+
 
 class AnalysisRequestsExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
