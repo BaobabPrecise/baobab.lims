@@ -648,14 +648,13 @@ class SamplesAliquotExporter(object):
         if brains:
             aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Volume', 'Unit',
                             'Storage', 'Centrifuge Start Time', 'Frozen Time', 'State', 'Sampling Time'])
-
         for brain in brains:
             sample = brain.getObject()
             row = []
             row.append(sample.Title())
             row.append(sample.getSampleType().Title())
-            row.append(sample.getField('SubjectId').get(sample))
-            row.append(sample.getField('SampleId').get(sample))
+            row.append(sample.getField('SubjectID').get(sample))
+            row.append(sample.getField('SampleID').get(sample))
             row.append(sample.getField('Volume').get(sample))
             row.append(sample.getField('Unit').get(sample))
 
@@ -666,8 +665,10 @@ class SamplesAliquotExporter(object):
                 row.append('')
 
             row.append(sample.getField('SamplingDate').get(sample))
-            row.append(sample.getField('CfgDateTime').get(sample))
-            row.append(sample.getField('').get(sample))
+            #row.append(sample.getField('CfgDateTime').get(sample))
+            row.append(sample.getField('FrozenTime').get(sample))
+            #row.append(sample.getField('state_title').get(sample))
+            row.append(sample.getField('SamplingDate').get(sample))
 
             aliquots.append(row)
         return aliquots
