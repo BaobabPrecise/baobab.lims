@@ -646,15 +646,17 @@ class SamplesAliquotExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
         if brains:
-            aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Volume', 'Unit',
+            aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Batch ID', 'Volume', 'Unit',
                             'Storage', 'Centrifuge Start Time', 'Frozen Time', 'State', 'Sampling Time'])
         for brain in brains:
             sample = brain.getObject()
+            batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
             row = []
             row.append(sample.Title())
             row.append(sample.getSampleType().Title())
             row.append(sample.getField('SubjectID').get(sample))
             row.append(sample.getField('SampleID').get(sample))
+            row.append(batch)
             row.append(sample.getField('Volume').get(sample))
             row.append(sample.getField('Unit').get(sample))
 
