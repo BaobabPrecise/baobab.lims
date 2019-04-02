@@ -1,0 +1,77 @@
+<html xmlns="http://www.w3.org/1999/xhtml"
+    xmlns:tal="http://xml.zope.org/namespaces/tal"
+    xmlns:metal="http://xml.zope.org/namespaces/metal"
+    xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+    metal:use-macro="here/main_template/macros/master"
+    i18n:domain="baobab">
+<body>
+
+<metal:content-title fill-slot="content-title">
+    <h1>
+        <img tal:condition="view/icon | nothing"
+             src="" tal:attributes="src view/icon"/>
+        <span class="documentFirstHeading">Export (Samples, Aliquots and Sample Batches)</span>
+    </h1>
+</metal:content-title>
+
+<metal:content-core fill-slot="content-core">
+
+    <form tal:condition="exists:view/submit_button" name="export" method="POST" enctype="multipart/form-data">
+        <input tal:replace="structure context/@@authenticator/authenticator"/>
+        <input type="hidden" name="submitted" value="1"/>
+
+        <fieldset id="fieldset-setupdata" tal:condition="python:checkPermission('BIKA: Manage Bika', context)">
+            <div style="margin-bottom:30px;">
+                <div style="float:left;width:47%;">
+                     <input name="setupfile" type="submit" value="Go >>" i18n:attributes="value"/>
+                    <p></p>
+                    <span i18n:translate="">Tip. Data will be exported and placed in exports folder under download folder.</span>
+                </div>
+            </div>
+        </fieldset>
+    </form>
+
+    <div tal:condition="exists:view/download_file" tal:attributes="id string:export-display-table">
+         <table class="bika-listing-table" summary="Content listing" style="margin-bottom:0px;" form_id="list">
+            <tbody tal:define="files view/get_filenames">
+            <span tal:repeat="file files">
+                <div tal:omit-tag="" tal:define="myindex python:repeat['file'].index">
+                    <tr tal:attributes="id string:${file}_tr">
+                        <td i18n:translate="" rowspan="1" colspan="1">
+                             <b tal:omit-tag="python:myindex!=0"> <span tal:content="file"></span></b>
+                        </td>
+                        <td i18n:translate="Link">
+                            <div class="exportActionLinks">
+                                <a href=""  tal:attributes="href string:$portal_url/++resource++baobab.lims.downloads/$file" download>
+                                  Download
+                                </a>
+                                <a href="#" tal:attributes="id string:$file" tal:condition="python:myindex != 0" class="deleteExportLink"> | Delete</a>
+                            </div>
+                            <div class="deleteExportConfirmation" style="display: none">
+                                <a href="#" tal:attributes="id string:$file" class="deleteExportCornfirmed">Yes</a> or
+                                <a href="#"  class="cancelDeleteExport">Cancel</a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr tal:condition="python:myindex == 0">
+                        <td><br /></td>
+                        <td><br /></td>
+                    </tr>
+                    <tr tal:condition="python:myindex == 0">
+                        <td>
+                            <span style="position:relative;top:-0.2em;" class="documentFirstHeading"><b>Previous Exports</b> </span>
+                        </td>
+                        <td></td>
+                    </tr>
+                </div>
+            </span>
+            </tbody>
+        </table>
+
+    </div>
+
+</metal:content-core>
+
+</body>
+</html>

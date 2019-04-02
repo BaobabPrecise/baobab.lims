@@ -23,5 +23,10 @@
       directory="js"
       layer="bika.lims.interfaces.IBikaLIMS"
       />
+  <browser:resourceDirectory
+      name="baobab.lims.downloads"
+      directory="downloads"
+      layer="bika.lims.interfaces.IBikaLIMS"
+      />
 
 </configure>
