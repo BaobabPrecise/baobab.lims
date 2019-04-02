@@ -30,7 +30,8 @@ setup(name='baobab.lims',
           'z3c.relationfield',
           'collective.wtf',
           'plone.formwidget.datetime',
-          'plone.app.dexterity [grok]'
+          'plone.app.dexterity [grok]',
+          'xlsxwriter', 
       ],
       extras_require={
           'test': [

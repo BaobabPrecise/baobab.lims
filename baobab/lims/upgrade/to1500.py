@@ -4,14 +4,12 @@ from Products.CMFCore.utils import getToolByName
 from zExceptions import BadRequest
 from Products.CMFCore import permissions
 
-
 def upgrade(tool):
     portal = aq_parent(aq_inner(tool))
 
     at = getToolByName(portal, 'archetype_tool')
     bsc = getToolByName(portal, 'bika_setup_catalog')
     pc = getToolByName(portal, 'portal_catalog')
-    portal = aq_parent(aq_inner(tool))
     setup = portal.portal_setup
     types_tool = getToolByName(portal, 'portal_types')
     # wf = getToolByName(portal, 'portal_workflow')
