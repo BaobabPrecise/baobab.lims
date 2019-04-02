@@ -31,7 +31,7 @@
         profile="baobab.lims:default"/>
 
     <genericsetup:upgradeStep
-        title="Precise Ugrade Script"
+        title="Precise Upgrade Script"
         description="Added precise changes"
         source="1500"
         destination="1510"
@@ -40,7 +40,7 @@
         profile="baobab.lims:default"/>
 
     <genericsetup:upgradeStep
-        title="Precise Ugrade Index Script"
+        title="Precise Upgrade Index Script"
         description="Added precise upgrade changes"
         source="1510"
         destination="1520"
@@ -49,11 +49,20 @@
         profile="baobab.lims:default"/>
 
     <genericsetup:upgradeStep
-        title="Precise Ugrade Index Script"
+        title="Precise Upgrade Index Script"
         description="Added precise upgrade for DateCreated BoxMovement bug changes"
         source="1520"
         destination="1530"
         handler="baobab.lims.upgrade.to1530.upgrade"
         sortkey="6"
+        profile="baobab.lims:default"/>
+
+    <genericsetup:upgradeStep
+        title="Precise Upgrade Index Script"
+        description="Extend import/export functionality"
+        source="1530"
+        destination="1540"
+        handler="baobab.lims.upgrade.to1540.upgrade"
+        sortkey="7"
         profile="baobab.lims:default"/>
 </configure>
