@@ -130,7 +130,7 @@ function BaobabSampleView() {
                 var rgx = new RegExp('(collection|heel)');
                 if (!rgx.test(theSampleType)) {
                     $("#SampleType").each( function() {
-                      alert("If you are creating a parent biospecimen, please search and choose a 'Collection' sample type or 'Heal Prick'.");
+                      alert("If you are creating a parent biospecimen, please choose a 'Collection' sample type or 'Heel Prick'.");
                     });
                 }
               }

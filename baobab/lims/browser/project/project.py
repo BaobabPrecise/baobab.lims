@@ -208,7 +208,8 @@ class ProjectBiospecimensView(BiospecimensView):
         for state in self.review_states:
             # state['contentFilter']['path'] = {'query': path, 'depth': 1}
             state['contentFilter']['getProjectUID'] = self.context.UID()
-            state['contentFilter']['sort_on'] = 'sortable_title'
+            # state['contentFilter']['sort_on'] = 'sortable_title'
+            state['contentFilter']['sort_on'] = 'created'
             state['columns'].remove('Project')
 
     def folderitems(self, full_objects=False):
