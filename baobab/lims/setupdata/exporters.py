@@ -615,7 +615,8 @@ class SamplesExporter(object):
             if sample.getField('LinkedSample').get(sample):
                 row = []
                 row.append(sample.Title())
-                project = sample.getField('Project').get(sample)
+                # project = sample.getField('Project').get(sample)
+                project = sample.aq_parent
                 row.append(project.Title())
                 row.append(sample.getSampleType().Title())
                 storage = sample.getField('StorageLocation').get(sample)
