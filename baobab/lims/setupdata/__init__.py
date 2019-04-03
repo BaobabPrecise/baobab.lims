@@ -349,16 +349,20 @@ class ParentSample(SampleImport):
     """
 
     def create_biospecimen(self, row):
+
         barcode = str(row.get('Barcode'))
         project = self.get_project(row.get('Project', ''))
         sample_type = self.get_sample_type(row.get('SampleType', ''))
         volume = self.get_volume(row.get('Volume', ''))
         obj = _createObjectByType('Sample', project, tmpID())
+
         self.complete_biospecimen(obj, sample_type, barcode, volume, row)
 
     def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
         title = row.get('title', barcode)
         storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+
+        sampling_date = row.get('SamplingDate', '')
 
         obj.edit(
             title=title,
@@ -371,9 +375,8 @@ class ParentSample(SampleImport):
             Volume=volume,
             Unit=row.get('Unit'),
             BabyNumber=row.get('BabyNo', ''),
-            DateCreated=row.get('DateCreated'),
-            # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
-            # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+            SamplingDate=sampling_date,
+            # FrozenTime=row.get('FrozenTime'),
         )
 
         obj.reindexObject()
@@ -406,8 +409,9 @@ class AliquotSample(SampleImport):
         field_b = obj.getField('Batch')
         field_b.set(obj, brains[0].getObject())
 
-        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+        sampling_date = row.get('SamplingTime', '')
 
+        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
         obj.edit(
             title=row.get('title'),
             description=row.get('description'),
@@ -420,9 +424,8 @@ class AliquotSample(SampleImport):
             Unit=row.get('Unit'),
             BabyNumber=row.get('BabyNo', ''),
             LinkedSample=parent,
-            DateCreated=row.get('DateCreated'),
-            # AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
-            # AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
+            SamplingDate=sampling_date,
+            FrozenTime=row.get('FrozenTime'),
         )
 
         obj.reindexObject()
@@ -447,17 +450,23 @@ class SampleBatch(WorksheetImporter):
         for row in rows:
             selected_project = row.get('Project', '')
             #import pdb;pdb.set_trace()
-            project_list = self._pc(portal_type="Project", Title=selected_project)
-            project = project_list and project_list[0].getObject() or None
+            if selected_project:
+                project_list = self._pc(portal_type="Project", Title=selected_project)
+                project = project_list and project_list[0].getObject() or None
+            else:
+                continue
             subject_id = row.get('SubjectID')
+            # sheet_parent_biospecimen = row.get('ParentBiospecimen', '')
+            # parent_biospecimen = None
+            # if sheet_parent_biospecimen:
             parent_biospecimen_list = self._pc(portal_type="Sample", Title=str(row.get('ParentBiospecimen', '')))
             parent_biospecimen = parent_biospecimen_list and parent_biospecimen_list[0].getObject() or None
 
             # TODO: VERIFY IT LATER
-            boxes = self.getStorageLocations(row.get('StorageLocations', ''))
+            storage_locations = row.get('StorageLocations', '')
+            boxes = self.getStorageLocations(storage_locations)
 
             batch_id = str(row.get('BatchID', ''))
-
             obj = _createObjectByType('SampleBatch', folder, tmpID())
 
             obj.edit(
@@ -468,6 +477,7 @@ class SampleBatch(WorksheetImporter):
                 Project=project,
                 SubjectID=subject_id,
                 StorageLocation=boxes,
+                Quantity=row.get('Quantity', 0),
                 ParentBiospecimen=parent_biospecimen,
                 DateCreated=row.get('DateCreated', ''),
                 SerumColour=row.get('SerumColour', ''),
@@ -484,16 +494,38 @@ class SampleBatch(WorksheetImporter):
         return sample_type
 
 
-    def getStorageLocations(self, locations):
+    # def getStorageLocations(self, locations):
+    #
+    #     locations = locations.split(',')
+    #     boxes = []
+    #     for location in locations:
+    #         title = location.split('.')[-1]
+    #         brains = self._pc(portal_type='ManagedStorage', Title=title)
+    #         for brain in brains:
+    #             if brain.getObject().getHierarchy() == location:
+    #                 boxes.append(brain.getObject())
+    #
+    #     return boxes
 
-        locations = locations.split(',')
+    def getStorageLocations(self, sheet_locations):
+
+        sheet_locations = sheet_locations.split(',')
+        # print(sheet_locations)
+        storage_positions = []
+
+        for sheet_location in sheet_locations:
+            try:
+                location_brains = self._pc(portal_type='StoragePosition', Title=sheet_location)
+                if location_brains:
+                    for brain in location_brains:
+                        storage_positions.append(brain.getObject())
+            except:
+                continue
+
         boxes = []
-        for location in locations:
-            title = location.split('.')[-1]
-            brains = self._pc(portal_type='ManagedStorage', Title=title)
-            for brain in brains:
-                if brain.getObject().getHierarchy() == location:
-                    boxes.append(brain.getObject())
+        for storage_position in storage_positions:
+            if storage_position.aq_parent not in boxes:
+                boxes.append(storage_position.aq_parent)
 
         return boxes
 
