@@ -312,8 +312,10 @@ class SampleImport(WorksheetImporter):
             self.create_biospecimen(row)
 
     def get_storage_location(self, row_storage_location):
-        st_loc_list = self._pc(portal_type='StoragePosition', Title=row_storage_location)
-        storage_location = st_loc_list and st_loc_list[0].getObject() or None
+        storage_location = None
+        if row_storage_location:
+            st_loc_list = self._pc(portal_type='StoragePosition', Title=row_storage_location)
+            storage_location = st_loc_list and st_loc_list[0].getObject() or None
         return storage_location
 
     def get_project(self, row_project):
