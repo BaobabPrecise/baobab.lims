@@ -7,6 +7,7 @@ from zope.interface import alsoProvides
 from baobab.lims.idserver import renameAfterCreation
 from baobab.lims.interfaces import ISampleStorageLocation, IStockItemStorage
 from baobab.lims.browser.project import *
+from bika.lims import logger
 
 
 def get_project_multi_items(context, string_elements, portal_type, portal_catalog):
@@ -26,6 +27,8 @@ def get_project_multi_items(context, string_elements, portal_type, portal_catalo
 
     return items
 
+class ExcelSheetError(Exception):
+    pass
 
 class SetupDataSetList(SDL):
 
@@ -33,6 +36,45 @@ class SetupDataSetList(SDL):
 
     def __call__(self):
         return SDL.__call__(self, projectname="baobab.lims")
+
+class BaobabWorksheetImporter(WorksheetImporter):
+
+    """Use this as a base, for normal tabular data sheet imports.
+    """
+
+    def __call__(self, lsd, workbook, dataset_project, dataset_name):
+        self.lsd = lsd
+        self.context = lsd.context
+        self.workbook = workbook
+        self.sheetname = self.__class__.__name__.replace("_", " ")
+        if self.sheetname not in workbook.sheetnames:
+            logger.error("Sheet '{0}' not found".format(self.sheetname))
+            return
+        self.worksheet = workbook.get_sheet_by_name(self.sheetname)
+        self.dataset_project = dataset_project
+        self.dataset_name = dataset_name
+        if self.worksheet:
+            logger.info("Loading {0}.{1}: {2}".format(
+                self.dataset_project, self.dataset_name, self.sheetname))
+            try:
+                print('--------------')
+                print('This is done from the baobab sheet importer.')
+                self.Import()
+                for error in self._errors:
+                    self.context.plone_utils.addPortalMessage(str(error))
+
+            except IOError:
+                # The importer must omit the files not found inside the server filesystem (bika/lims/setupdata/test/
+                # if the file is loaded from 'select existing file' or bika/lims/setupdata/uploaded if it's loaded from
+                # 'Load from file') and finishes the import without errors. https://jira.bikalabs.com/browse/LIMS-1624
+                warning = "Error while loading attached file from %s. The file will not be uploaded into the system."
+                logger.warning(warning, self.sheetname)
+                self.context.plone_utils.addPortalMessage("Error while loading some attached files. "
+                                                          "The files weren't uploaded into the system.")
+                self.context.plone_utils.addPortalMessage("Another deliberate test.")
+                self.context.plone_utils.addPortalMessage("Third deliberate test.")
+        else:
+            logger.info("No records found: '{0}'".format(self.sheetname))
 
 
 class Products(WorksheetImporter):
@@ -298,7 +340,7 @@ class Projects(WorksheetImporter):
             renameAfterCreation(obj)
 
 
-class SampleImport(WorksheetImporter):
+class SampleImport(BaobabWorksheetImporter):
     """ Import biospecimens
     """
 
@@ -306,16 +348,23 @@ class SampleImport(WorksheetImporter):
 
         self._pc = getToolByName(self.context, 'portal_catalog')
         self._bc = getToolByName(self.context, 'bika_catalog')
+        self._wf = getToolByName(self.context, 'portal_workflow')
+        self._errors = []
 
         rows = self.get_rows(3)
         for row in rows:
-            self.create_biospecimen(row)
+            try:
+                self.create_biospecimen(row)
+            except ExcelSheetError as e:
+                self._errors.append(str(e))
+                continue
 
     def get_storage_location(self, row_storage_location):
         storage_location = None
         if row_storage_location:
             st_loc_list = self._pc(portal_type='StoragePosition', Title=row_storage_location)
             storage_location = st_loc_list and st_loc_list[0].getObject() or None
+
         return storage_location
 
     def get_project(self, row_project):
@@ -356,16 +405,16 @@ class ParentSample(SampleImport):
         project = self.get_project(row.get('Project', ''))
         sample_type = self.get_sample_type(row.get('SampleType', ''))
         volume = self.get_volume(row.get('Volume', ''))
-        obj = _createObjectByType('Sample', project, tmpID())
-
-        self.complete_biospecimen(obj, sample_type, barcode, volume, row)
-
-    def complete_biospecimen(self, obj, sample_type, barcode, volume, row):
         title = row.get('title', barcode)
         storage_location = self.get_storage_location(row.get('StorageLocation', ''))
-
         sampling_date = row.get('SamplingDate', '')
 
+        if storage_location:
+            storage_wf_state = self._wf.getInfoFor(storage_location, 'review_state')
+            if storage_wf_state == 'occupied':
+                raise ExcelSheetError('Import Error Sample %s: Storage %s already occupied.' % (title, storage_location.Title()))
+
+        obj = _createObjectByType('Sample', project, tmpID())
         obj.edit(
             title=title,
             description=row.get('description'),
@@ -394,28 +443,32 @@ class AliquotSample(SampleImport):
     """
 
     def create_biospecimen(self, row):
+
         barcode = str(row.get('Barcode'))
         batch_id = str(row.get('BatchID', ''))
         brains = self._bc(portal_type='SampleBatch', Title=batch_id)
 
         parent = self.get_linked_sample(str(row.get('Parent', '')))
-
         project_obj = brains[0].getObject().getProject()
 
         sample_type = self.get_sample_type(row.get('SampleType', ''))
-
         volume = self.get_volume(row.get('Volume', ''))
+        sampling_date = row.get('SamplingTime', '')
+
+        title = row.get('Title', barcode)
+
+        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
+        if storage_location:
+            storage_wf_state = analysis_state = self._wf.getInfoFor(storage_location, 'review_state')
+            if storage_wf_state == 'occupied':
+                raise ExcelSheetError('Import Error Sample %s: Storage %s already occupied.' % (barcode, storage_location.Title()))
 
         obj = _createObjectByType('Sample', project_obj, tmpID())
-
         field_b = obj.getField('Batch')
         field_b.set(obj, brains[0].getObject())
 
-        sampling_date = row.get('SamplingTime', '')
-
-        storage_location = self.get_storage_location(row.get('StorageLocation', ''))
         obj.edit(
-            title=row.get('title'),
+            title=title,
             description=row.get('description'),
             Project=project_obj,
             SampleType=sample_type,
@@ -494,20 +547,6 @@ class SampleBatch(WorksheetImporter):
         sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)
         sample_type = sampletype_list and sampletype_list[0].getObject() or None
         return sample_type
-
-
-    # def getStorageLocations(self, locations):
-    #
-    #     locations = locations.split(',')
-    #     boxes = []
-    #     for location in locations:
-    #         title = location.split('.')[-1]
-    #         brains = self._pc(portal_type='ManagedStorage', Title=title)
-    #         for brain in brains:
-    #             if brain.getObject().getHierarchy() == location:
-    #                 boxes.append(brain.getObject())
-    #
-    #     return boxes
 
     def getStorageLocations(self, sheet_locations):
 
