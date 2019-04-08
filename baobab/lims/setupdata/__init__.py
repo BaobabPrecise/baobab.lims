@@ -57,9 +57,11 @@ class BaobabWorksheetImporter(WorksheetImporter):
             logger.info("Loading {0}.{1}: {2}".format(
                 self.dataset_project, self.dataset_name, self.sheetname))
             try:
+                print('--------------')
+                print('This is done from the baobab sheet importer.')
                 self.Import()
                 for error in self._errors:
-                    self.context.plone_utils.addPortalMessage(str(error), 'error')
+                    self.context.plone_utils.addPortalMessage(str(error))
 
             except IOError:
                 # The importer must omit the files not found inside the server filesystem (bika/lims/setupdata/test/
@@ -356,9 +358,6 @@ class SampleImport(BaobabWorksheetImporter):
             except ExcelSheetError as e:
                 self._errors.append(str(e))
                 continue
-            except Exception as e:
-                self._errors.append(str(e))
-                continue
 
     def get_storage_location(self, row_storage_location):
         storage_location = None
@@ -383,27 +382,17 @@ class SampleImport(BaobabWorksheetImporter):
         linked_sample = linked_sample_list and linked_sample_list[0].getObject() or None
         return linked_sample
 
-    def confirm_unique_title(self, title):
-        if not title:
-            return
-        sample_list = self._pc(portal_type="Sample", Title=title)
-        existing_sample = sample_list and sample_list[0].getObject() or None
-        if existing_sample:
-            raise ExcelSheetError('Sample with title or barcode %s already exists.' % title)
-
-
-
 
     def get_volume(self, row_volume):
         try:
             volume = str(row_volume)
             float_volume = float(volume)
             if not float_volume:
-                raise ExcelSheetError('Invalid volume specified: %s' %row_volume)
+                raise ()
             return str(float_volume)
         except Exception as e:
-            self._errors.append('Volume error has been found : %s' % str(e))
-            # raise ()
+            print('Error has been found : %s' % str(e))
+            raise ()
 
 
 class ParentSample(SampleImport):
@@ -417,7 +406,6 @@ class ParentSample(SampleImport):
         sample_type = self.get_sample_type(row.get('SampleType', ''))
         volume = self.get_volume(row.get('Volume', ''))
         title = row.get('title', barcode)
-        self.confirm_unique_title(barcode)
         storage_location = self.get_storage_location(row.get('StorageLocation', ''))
         sampling_date = row.get('SamplingDate', '')
 
@@ -468,7 +456,6 @@ class AliquotSample(SampleImport):
         sampling_date = row.get('SamplingTime', '')
 
         title = row.get('Title', barcode)
-        self.confirm_unique_title(barcode)
 
         storage_location = self.get_storage_location(row.get('StorageLocation', ''))
         if storage_location:
@@ -490,7 +477,7 @@ class AliquotSample(SampleImport):
             Barcode=barcode,
             Volume=volume,
             Unit=row.get('Unit'),
-            # BabyNumber=row.get('BabyNo', ''),
+            BabyNumber=row.get('BabyNo', ''),
             LinkedSample=parent,
             SamplingDate=sampling_date,
             FrozenTime=row.get('FrozenTime'),
