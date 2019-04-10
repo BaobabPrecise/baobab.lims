@@ -13,6 +13,7 @@ from excelwriter import ExcelWriter
 
 from bika.lims.browser import BrowserView
 
+
 class RemoveExports(BrowserView):
     def __init__(self, context, request):
 
@@ -31,6 +32,7 @@ class RemoveExports(BrowserView):
         return json.dumps({
             'row_id': doc_id
         })
+
 
 class ExportView(IV):
     """
@@ -51,7 +53,8 @@ class ExportView(IV):
 
             self.download_file = True
             self.files = self.get_filenames()
-            self.context.plone_utils.addPortalMessage('Export successfully completed.')
+            self.context.plone_utils.addPortalMessage(
+                'Export successfully completed.')
         else:
             self.submit_button = True
         return self.template()
@@ -82,6 +85,5 @@ class ExportView(IV):
         # get the box-movement
         exporter = BoxMovementExporter(self.context)
         export_dict['Box Movement'] = exporter.export()
-
 
         self.excel_writer.write_output(export_dict)
