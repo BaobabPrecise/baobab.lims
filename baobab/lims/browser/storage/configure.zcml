@@ -120,4 +120,13 @@
             layer="bika.lims.interfaces.IBikaLIMS"
     />
 
+    <!-- Workflow action button clicked in StorageUnits folder list -->
+    <browser:page
+        for="baobab.lims.interfaces.IStorageUnit"
+        name="workflow_action"
+        class="baobab.lims.browser.storage.workflow.StorageWorkflowAction"
+        permission="zope.Public"
+        layer="bika.lims.interfaces.IBikaLIMS"
+    />
+
 </configure>
