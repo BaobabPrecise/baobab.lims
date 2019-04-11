@@ -63,7 +63,7 @@ function BaobabBiospecimensView() {
     }
 
     function updateSerumColour(batchTypeSelected) {
-        var regex = new RegExp('(plasma|serum)');
+        var regex = new RegExp('(plasma|serum)', 'i');
         if (regex.test(batchTypeSelected)) {
             $('tr[fieldname=SerumColour]').show();
         } else {
@@ -73,7 +73,7 @@ function BaobabBiospecimensView() {
     }
 
     function updateCentrifugeFormalinTime(batchTypeSelected) {
-        var regex = new RegExp('(plasma|serum|buffy|sediment|dacron|formalin)');
+        var regex = new RegExp('(Plasma|Serum|Buffy|Sediment|Dacron|Formalin)', 'i');
         if (regex.test(batchTypeSelected)) {
             $('tr[fieldname=CfgDateTime]').show();
         } else {

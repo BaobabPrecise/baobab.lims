@@ -29,7 +29,7 @@ class BiospecimensView(BikaListingView):
         self.contentFilter = {
             'portal_type': 'Sample',
             'sort_on': 'sortable_title',
-            'sort_order': 'ascending'
+            'sort_order': 'reverse'
         }
         self.context_actions = {}
         self.title = self.context.translate(_("Biospecimens"))
@@ -38,13 +38,13 @@ class BiospecimensView(BikaListingView):
         self.description = ''
         self.show_sort_column = False
         self.show_select_row = False
-        self.show_select_column = False
+        self.show_select_column = True
         self.allow_edit = True
         self.content_type = content_type
         if self.content_type == 'batch':
             self.pagesize = 1000
         else:
-            self.pagesize = 25
+            self.pagesize = 50
 
         if self.context.portal_type == 'Biospecimens':
             self.request.set('disable_border', 1)
@@ -73,6 +73,7 @@ class BiospecimensView(BikaListingView):
             },
             'SubjectID': {
                 'title': _('Subject ID'),
+                'index': 'sortable_title',
                 'allow_edit': True,
                 'input_class': 'text',
                 'input_width': '10',
@@ -80,9 +81,10 @@ class BiospecimensView(BikaListingView):
             },
             'Barcode': {
                 'title': _('Barcode'),
+                'index': 'sortable_title',
                 'allow_edit': True,
                 'input_class': 'text',
-                'input_width': '10',
+                'input_width': '15',
                 'toggle': True
             },
             'Project': {
@@ -108,6 +110,7 @@ class BiospecimensView(BikaListingView):
 
             'SamplingTime': {
                 'title': _('Sampling Time'),
+                'index': 'sortable_title',
                 'toggle': True
             },
         }
@@ -118,8 +121,8 @@ class BiospecimensView(BikaListingView):
                 'title': _('Active'),
                 'contentFilter': {
                     'cancellation_state': 'active',
-                    'sort_on': 'sortable_title',
-                    'sort_order': 'ascending'
+                    'sort_on': 'created',
+                    'sort_order': 'reverse'
                 },
                 'transitions': [
                     {'id': 'receive'},
@@ -149,7 +152,7 @@ class BiospecimensView(BikaListingView):
                     'review_state': 'sample_registered',
                     'cancellation_state': 'active',
                     'sort_on': 'created',
-                    'sort_order': 'ascending'
+                    'sort_order': 'reverse'
                 },
                 'transitions': [
                     {'id': 'sample_due'},
@@ -174,7 +177,7 @@ class BiospecimensView(BikaListingView):
                     'review_state': 'sample_due',
                     'cancellation_state': 'active',
                     'sort_on': 'created',
-                    'sort_order': 'ascending'
+                    'sort_order': 'reverse'
                 },
                 'transitions': [
                     {'id': 'receive'},
@@ -202,7 +205,7 @@ class BiospecimensView(BikaListingView):
                     'review_state': 'sample_shipped',
                     'cancellation_state': 'active',
                     'sort_on': 'created',
-                    'sort_order': 'ascending'
+                    'sort_order': 'reverse'
                 },
                 'transitions': [
                     {'id': 'receive'}
@@ -281,7 +284,7 @@ class BiospecimensView(BikaListingView):
                 'title': _('All'),
                 'contentFilter': {
                     'sort_on': 'created',
-                    'sort_order': 'ascending'
+                    'sort_order': 'reverse'
                 },
                 'columns': [
                     'Title',

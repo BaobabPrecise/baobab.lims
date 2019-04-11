@@ -19,7 +19,7 @@ class BatchesView(BikaListingView):
         self.contentFilter = {
             'portal_type': 'SampleBatch',
             'sort_on': 'sortable_title',
-            'sort_order': 'ascending'
+            'sort_order': 'reverse'
         }
         self.context_actions = {}
         self.title = self.context.translate(_("Biospecimen Batches"))
@@ -29,8 +29,8 @@ class BatchesView(BikaListingView):
         self.description = ''
         self.show_sort_column = False
         self.show_select_row = False
-        self.show_select_column = False
-        self.pagesize = 25
+        self.show_select_column = True
+        self.pagesize = 50
         self.allow_edit = True
 
         self.columns = {
@@ -44,7 +44,7 @@ class BatchesView(BikaListingView):
             },
             'ParentBiospecimen': {
                 'title': _('Parent ID'),
-                # 'index': 'sortable_title'
+                'index': 'sortable_title'
             },
             'BatchType': {
                 'title': _('Batch Type'),
@@ -63,7 +63,11 @@ class BatchesView(BikaListingView):
             {
                 'id': 'default',
                 'title': _('Active'),
-                'contentFilter': {'inactive_state': 'active'},
+                'contentFilter': {
+                    'inactive_state': 'active',
+                    'sort_on': 'created',
+                    'sort_order': 'reverse'
+                },
                 'transitions': [],
                 'columns': [
                     'Title',
@@ -81,7 +85,7 @@ class BatchesView(BikaListingView):
                 'title': _('All'),
                 'contentFilter': {
                     'sort_on': 'created',
-                    'sort_order': 'ascending'
+                    'sort_order': 'reverse'
                 },
                 'columns': [
                     'Title',
