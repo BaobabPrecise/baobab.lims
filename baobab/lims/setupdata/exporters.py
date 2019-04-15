@@ -571,7 +571,11 @@ class SampleBatchesExporter(object):
                 row = []
                 row.append(str(sample_batch.Title()))
                 row.append(sample_batch.getSubjectID())
-                row.append(sample_batch.getParentBiospecimen().Title())
+                parent_biospecimen_title = ''
+                parent_biospecimen = sample_batch.getParentBiospecimen()
+                if parent_biospecimen:
+                    parent_biospecimen_title = parent_biospecimen.Title()
+                row.append(parent_biospecimen_title)
                 row.append(str(sample_batch.getBatchId()))
                 row.append(sample_batch.getBatchType())
 
@@ -624,13 +628,13 @@ class SamplesExporter(object):
                     row.append(storage.getHierarchy())
                 else:
                     row.append('')
-                row.append(sample.getSamplingDate())
+                row.append(str(sample.getSamplingDate() or ''))
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
                 row.append(sample.getField('BabyNumber').get(sample))
-                row.append(sample.getField('DateCreated').get(sample))
+                row.append(str(sample.getField('DateCreated').get(sample) or ''))
 
                 samples.append(row)
         return samples
@@ -648,7 +652,7 @@ class SamplesAliquotExporter(object):
         brains = pc(portal_type="Sample")
         if brains:
             aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Batch ID', 'Volume', 'Unit',
-                            'Storage', 'Centrifuge Start Time', 'Frozen Time', 'State', 'Sampling Time'])
+                            'Storage', 'Frozen Time', 'Sampling Time'])
         for brain in brains:
             sample = brain.getObject()
             batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
@@ -667,11 +671,9 @@ class SamplesAliquotExporter(object):
             else:
                 row.append('')
 
-            row.append(sample.getField('SamplingDate').get(sample))
-            #row.append(sample.getField('CfgDateTime').get(sample))
-            row.append(sample.getField('FrozenTime').get(sample))
-            #row.append(sample.getField('state_title').get(sample))
-            row.append(sample.getField('SamplingDate').get(sample))
+            # row.append(sample.getField('SamplingDate').get(sample))
+            row.append(str(sample.getField('FrozenTime').get(sample) or ''))
+            row.append(str(sample.getField('SamplingDate').get(sample) or ''))
 
             aliquots.append(row)
         return aliquots
