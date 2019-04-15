@@ -38,6 +38,10 @@ class BatchesView(BikaListingView):
                 'title': _('Title'),
                 'index': 'sortable_title'
             },
+            'Description': {
+                'title': _('Description'),
+                'index': 'sortable_title'
+            },
             'Project': {
                 'title': _('Project'),
                 'index': 'sortable_title'
@@ -71,6 +75,7 @@ class BatchesView(BikaListingView):
                 'transitions': [],
                 'columns': [
                     'Title',
+                    'Description',
                     'Project',
                     'ParentBiospecimen',
                     'BatchType',
@@ -89,6 +94,7 @@ class BatchesView(BikaListingView):
                 },
                 'columns': [
                     'Title',
+                    'Description',
                     'Project',
                     'ParentBiospecimen',
                     'BatchType',
@@ -119,6 +125,12 @@ class BatchesView(BikaListingView):
                 continue
             obj = item['obj']
             # item['BatchType'] = obj.getBatchType()
+            short_description_length = 40
+            short_description = ''
+            description = obj.Description()
+            if description and len(description) > short_description_length:
+                short_description = str(description)[:short_description_length] + ' ...'
+            items[x]['replace']['Description'] = '<span title="%s">%s</span>' % (description, short_description)
             item['BatchType'] = obj.getField('BatchType').get(obj)
             item['replace']['Title'] = \
                 "<a href='%s'>%s</a>" % (item['url'], item['Title'])
