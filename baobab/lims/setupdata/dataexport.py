@@ -25,7 +25,7 @@ class RemoveExports(BrowserView):
         uc = getToolByName(self.context, 'portal_catalog')
         doc_id = self.request.form['id']
 
-        filename = 'src/baobab.lims/baobab/lims/static/downloads/' + doc_id
+        filename = '/usr/local/Plone/zeocluster/src/baobab.lims/baobab/lims/static/downloads/' + doc_id
         if os.path.exists(filename):
             os.remove(filename)
 
@@ -62,7 +62,7 @@ class ExportView(IV):
     def get_filenames(self):
         from os import listdir
         from os.path import isfile, join, getmtime
-        path = 'src/baobab.lims/baobab/lims/static/downloads/'
+        path = '/usr/local/Plone/zeocluster/src/baobab.lims/baobab/lims/static/downloads/'
         files = [f for f in listdir(path) if isfile(join(path, f))]
         files.sort(key=lambda x: getmtime(join(path, x)), reverse=True)
         return files
