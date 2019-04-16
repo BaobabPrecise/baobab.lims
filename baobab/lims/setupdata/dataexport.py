@@ -15,22 +15,26 @@ from bika.lims.browser import BrowserView
 
 
 class RemoveExports(BrowserView):
+    _DOWNLOADS_DIR = 'static/downloads/'
+
     def __init__(self, context, request):
 
         super(RemoveExports, self).__init__(context, request)
         self.context = context
         self.request = request
 
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.download_dir = os.path.join(base_dir, self._DOWNLOADS_DIR)
+
     def __call__(self):
         uc = getToolByName(self.context, 'portal_catalog')
-        doc_id = self.request.form['id']
 
-        filename = 'src/baobab.lims/baobab/lims/static/downloads/' + doc_id
+        filename = self.download_dir + self.request.form['id']
         if os.path.exists(filename):
             os.remove(filename)
 
         return json.dumps({
-            'row_id': doc_id
+            'row_id': self.request.form['id']
         })
 
 
@@ -39,6 +43,7 @@ class ExportView(IV):
     """
     implements(IViewView)
     template = ViewPageTemplateFile("templates/export.pt")
+    _DOWNLOADS_DIR = 'static/downloads/'
 
     def __init__(self, context, request):
         IV.__init__(self, context, request)
@@ -49,6 +54,11 @@ class ExportView(IV):
         if 'submitted' in self.request:
             lab = self.context.bika_setup.laboratory
             self.excel_writer = ExcelWriter()
+
+            base_dir = os.path.dirname(
+                os.path.dirname(os.path.abspath(__file__)))
+            self.download_dir = os.path.join(base_dir, self._DOWNLOADS_DIR)
+
             self.export_data()
 
             self.download_file = True
@@ -62,9 +72,12 @@ class ExportView(IV):
     def get_filenames(self):
         from os import listdir
         from os.path import isfile, join, getmtime
-        path = 'src/baobab.lims/baobab/lims/static/downloads/'
-        files = [f for f in listdir(path) if isfile(join(path, f))]
-        files.sort(key=lambda x: getmtime(join(path, x)), reverse=True)
+
+        files = [f for f in listdir(self.download_dir) if isfile(
+            join(self.download_dir, f))]
+
+        files.sort(key=lambda x: getmtime(
+            join(self.download_dir, x)), reverse=True)
         return files
 
     def export_data(self):

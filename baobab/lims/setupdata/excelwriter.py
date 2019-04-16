@@ -1,15 +1,25 @@
 import xlsxwriter
 import datetime
+import os
 
 
 class ExcelWriter(object):
 
+    _DOWNLOADS_DIR = 'static/downloads/'
+
     def __init__(self):
         filename = str(datetime.datetime.now().date()) + '_' + \
             str(datetime.datetime.now().time()).replace(':', '.')
-        self.dir_path = "src/baobab.lims/baobab/lims/static/downloads/{}.xlsx".format(
-            filename)
-        self.workbook = xlsxwriter.Workbook(self.dir_path, {'in_memory': True})
+
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        self.download_dir = os.path.join(base_dir, self._DOWNLOADS_DIR)
+
+        self.workbook = xlsxwriter.Workbook(
+            self.download_dir + "{}.xlsx".format(filename))
+
+        # Add an Excel date format.
+        # date_format = self.workbook.add_format({'num_format': 'mmmm d yyyy'})
+
         self.bold = self.workbook.add_format({'bold': True})
 
     def write_output(self, worksheet_data):
@@ -20,4 +30,5 @@ class ExcelWriter(object):
                     work_sheet.write_row(i, 0, row, self.bold)
                 else:
                     work_sheet.write_row(i, 0, row)
+
         self.workbook.close()
