@@ -99,4 +99,8 @@ class ExportView(IV):
         exporter = BoxMovementExporter(self.context)
         export_dict['Box Movement'] = exporter.export()
 
+        # get the sample shipment
+        exporter = SampleShipmentExporter(self.context)
+        export_dict['Sample Shipment'] = exporter.export()
+
         self.excel_writer.write_output(export_dict)

@@ -44,6 +44,10 @@ class SampleShipmentsView(BikaListingView):
             # },
             'Title': {'title': _('Sample Shipment'),
                       'index': 'sortable_title'},
+            'Description': {
+                'title': _('Description'),
+                'index': 'sortable_title'
+            },
             'SamplesList': {
                 'title': _('Samples'),
                 'type': 'choices'
@@ -69,6 +73,7 @@ class SampleShipmentsView(BikaListingView):
                 'columns': [
                     # 'SampleShipmentID',
                     'Title',
+                    'Description',
                     'SamplesList',
                     'Client',
                 ]
@@ -86,6 +91,7 @@ class SampleShipmentsView(BikaListingView):
                 'columns': [
                     # 'SampleShipmentID',
                     'Title',
+                    'Description',
                     'SamplesList',
                     'Client',
                 ]
@@ -103,6 +109,7 @@ class SampleShipmentsView(BikaListingView):
                 'columns': [
                     # 'SampleShipmentID',
                     'Title',
+                    'Description',
                     'SamplesList',
                     'Client',
                 ]
@@ -119,6 +126,7 @@ class SampleShipmentsView(BikaListingView):
                 'columns': [
                     # 'SampleShipmentID',
                     'Title',
+                    'Description',
                     'SamplesList',
                     'Client',
                 ]
@@ -140,6 +148,13 @@ class SampleShipmentsView(BikaListingView):
             if not items[x].has_key('obj'):
                 continue
             obj = items[x]['obj']
+            short_description_length = 40
+            short_description = ''
+            description = obj.Description()
+            if description and len(description) > short_description_length:
+                short_description = str(description)[:short_description_length] + ' ...'
+            items[x]['replace']['Description'] = '<span title="%s">%s</span>' % (description, short_description)
+
             items[x]['SampleShipmentID'] = obj.getId()
 
             items[x]['replace']['SampleShipmentID'] = "<a href='%s'>%s</a>" % \

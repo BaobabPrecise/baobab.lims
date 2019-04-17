@@ -17,9 +17,6 @@ class ExcelWriter(object):
         self.workbook = xlsxwriter.Workbook(
             self.download_dir + "{}.xlsx".format(filename))
 
-        # Add an Excel date format.
-        # date_format = self.workbook.add_format({'num_format': 'mmmm d yyyy'})
-
         self.bold = self.workbook.add_format({'bold': True})
 
     def write_output(self, worksheet_data):
