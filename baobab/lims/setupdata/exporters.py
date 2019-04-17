@@ -715,6 +715,49 @@ class BoxMovementExporter(object):
         return box_movements
 
 
+class SampleShipmentExporter(object):
+    """ This class packages all the samples info into a list of dictionaries and then returns it.
+        Returns all the samples except Aliquots (Samples with Parent Samples/LinkedSample)
+    """
+    def __init__(self, context):
+        self.context = context
+
+    def export(self):
+        sample_shipments = []
+        pc = getToolByName(self.context, 'portal_catalog')
+        brains = pc(portal_type="SampleShipment")
+
+        if brains:
+            sample_shipments.append(['Title', 'Description', 'Volume','Weight', 'Shipping Cost', 'Shipping Conditions',
+                            'Tracking URL', 'Courier Instructions', 'Courier', 'Date Delivered', 'Date Dispatched',
+                            'Date Created'])
+
+        for brain in brains:
+            shipment = brain.getObject()
+            if shipment.getField('LinkedSample').get(shipment):
+                row = []
+                row.append(shipment.Title())
+                project = shipment.getField('Project').get(shipment)
+                row.append(project.Title())
+                row.append(shipment.getshipmentType().Title())
+                storage = shipment.getField('StorageLocation').get(shipment)
+                if storage:
+                    row.append(storage.getHierarchy())
+                else:
+                    row.append('')
+                row.append(shipment.getSamplingDate())
+                row.append(shipment.getField('SubjectID').get(shipment))
+                row.append(shipment.getField('Barcode').get(shipment))
+                row.append(shipment.getField('Volume').get(shipment))
+                row.append(shipment.getField('Unit').get(shipment))
+                row.append(shipment.getField('BabyNumber').get(shipment))
+                row.append(shipment.getField('DateCreated').get(shipment))
+
+                sample_shipments.append(row)
+        return sample_shipments
+
+
+
 class AnalysisRequestsExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
     """
