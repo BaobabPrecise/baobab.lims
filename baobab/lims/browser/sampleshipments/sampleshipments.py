@@ -19,7 +19,7 @@ class SampleShipmentsView(BikaListingView):
         self.catalog = 'bika_catalog'
         request.set('disable_plone.rightcolumn', 1)
         self.contentFilter = {
-            'portal_type': 'SampleShipment',
+            'portal_type': 'r',
         }
         self.context_actions = {_('Add'):
                                     {'url': 'createObject?type_name=SampleShipment',
