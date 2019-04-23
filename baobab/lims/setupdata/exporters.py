@@ -612,11 +612,11 @@ class SamplesExporter(object):
         brains = pc(portal_type="Sample")
         if brains:
             samples.append(['Title', 'Project (or Visit type)', 'Sample Type','Storage Location', 'Sampling Date',
-                            'Subject ID', 'Barcode (or Kit ID)', 'Volume', 'Unit', 'Baby No.', 'Date Created'])
-
+                            'Sample State', 'Subject ID', 'Barcode (or Kit ID)', 'Volume', 'Unit', 'Baby No.',
+                            'Date Created'])
         for brain in brains:
             sample = brain.getObject()
-            if sample.getField('LinkedSample').get(sample):
+            if not sample.getField('LinkedSample').get(sample):
                 row = []
                 row.append(sample.Title())
                 # project = sample.getField('Project').get(sample)
@@ -628,14 +628,14 @@ class SamplesExporter(object):
                     row.append(storage.getHierarchy())
                 else:
                     row.append('')
-                row.append(str(sample.getSamplingDate() or ''))
+                row.append(sample.getSamplingDate() or '')
+                row.append(sample.getSampleState())
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
                 row.append(sample.getField('BabyNumber').get(sample))
-                row.append(str(sample.getField('DateCreated').get(sample) or ''))
-
+                row.append(sample.getField('DateCreated').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
                 samples.append(row)
         return samples
 
@@ -651,31 +651,32 @@ class SamplesAliquotExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
         if brains:
-            aliquots.append(['Title', 'Sample Type', 'Subject ID', 'Sample ID', 'Batch ID', 'Volume', 'Unit',
-                            'Storage', 'Frozen Time', 'Sampling Time'])
+            aliquots.append(['Title', 'Sample Type', 'Sample State', 'Subject ID', 'Sample ID', 'Batch ID', 'Volume',
+                             'Unit', 'Storage', 'Frozen Time', 'Sampling Time'])
         for brain in brains:
             sample = brain.getObject()
-            batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
-            row = []
-            row.append(sample.Title())
-            row.append(sample.getSampleType().Title())
-            row.append(sample.getField('SubjectID').get(sample))
-            row.append(sample.getField('SampleID').get(sample))
-            row.append(batch)
-            row.append(sample.getField('Volume').get(sample))
-            row.append(sample.getField('Unit').get(sample))
+            if sample.getField('LinkedSample').get(sample):
+                batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
+                row = []
+                row.append(sample.Title())
+                row.append(sample.getSampleType().Title())
+                row.append(sample.getSampleState())
+                row.append(sample.getField('SubjectID').get(sample))
+                row.append(sample.getField('SampleID').get(sample))
+                row.append(batch)
+                row.append(sample.getField('Volume').get(sample))
+                row.append(sample.getField('Unit').get(sample))
 
-            storage = sample.getField('StorageLocation').get(sample)
-            if storage:
-                row.append(storage.getHierarchy())
-            else:
-                row.append('')
+                storage = sample.getField('StorageLocation').get(sample)
+                if storage:
+                    row.append(storage.getHierarchy())
+                else:
+                    row.append('')
+                # row.append(sample.getField('SamplingDate').get(sample))
+                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                row.append(sample.getField('SamplingDate').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
 
-            # row.append(sample.getField('SamplingDate').get(sample))
-            row.append(str(sample.getField('FrozenTime').get(sample) or ''))
-            row.append(str(sample.getField('SamplingDate').get(sample) or ''))
-
-            aliquots.append(row)
+                aliquots.append(row)
         return aliquots
 
 class BoxMovementExporter(object):
@@ -690,12 +691,13 @@ class BoxMovementExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="BoxMovement")
         if brains:
-            box_movements.append(['Title', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved'])
+            box_movements.append(['Title', 'Description', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved'])
 
         for brain in brains:
             box_move = brain.getObject()
             row = []
             row.append(box_move.Title())
+            row.append(box_move.getField('description').get(box_move) if box_move.getField('description') else '')
             old_storage = box_move.getField('StorageLocation').get(box_move)
             if old_storage:
                 row.append(str(old_storage.getHierarchy()))
@@ -746,16 +748,15 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('TrackingURL').get(shipment)) if shipment.getField('TrackingURL') else '')
                 row.append(str(shipment.getField('CourierInstructions').get(shipment)) if shipment.getField('CourierInstructions') else '')
                 row.append(str(shipment.getField('Courier').get(shipment)))
-                row.append(shipment.getField('DateDelivered').get(shipment) if shipment.getField('DateDelivered') else '')
-                row.append(shipment.getField('DateDispatched').get(shipment) if shipment.getField('DateDispatched') else '')
-                row.append(shipment.getField('ShippingDate').get(shipment) if shipment.getField('ShippingDate') else '' )
+                row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDelivered') else '')
+                row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDispatched') else '')
+                row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('ShippingDate') else '' )
                 row.append(str(shipment.getField('BillingAddress').get(shipment)) if shipment.getField('BillingAddress') else '')
                 row.append(str(shipment.getField('DeliveryAddress').get(shipment)))
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
-                row.append(str(shipment.getField('SamplesList').get(shipment)) if shipment.getField('SamplesList') else '')
-
+                row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
                 sample_shipments.append(row)
         return sample_shipments
 

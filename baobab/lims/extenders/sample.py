@@ -332,24 +332,6 @@ class SampleSchemaExtender(object):
                 showOn=True,
             )
         ),
-        # ExtStringField(
-        #     'Unit',
-        #     default="ul",
-        #     widget=StringWidget(
-        #         label=_("Unit"),
-        #         visible={'edit': 'visible',
-        #                  'view': 'visible',
-        #                  'header_table': 'visible',
-        #                  'sample_registered': {'view': 'visible', 'edit': 'visible'},
-        #                  'sample_due': {'view': 'visible', 'edit': 'visible'},
-        #                  'sampled': {'view': 'visible', 'edit': 'invisible'},
-        #                  'sample_received': {'view': 'visible', 'edit': 'visible'},
-        #                  'expired': {'view': 'visible', 'edit': 'invisible'},
-        #                  'disposed': {'view': 'visible', 'edit': 'invisible'},
-        #                  },
-        #         render_own_label=True,
-        #     )
-        # ),
         ExtReferenceField(
             'LinkedSample',
             vocabulary_display_path_bound=sys.maxsize,
@@ -480,9 +462,6 @@ class Sample(BaseSample):
         else:
             return self.aq_parent.UID()
 
-    # def getUnits(self):
-    #     return ['ul', 'ml', 'mg', 'g', 'other']
-
     def getUnits(self):
         return ['', 'ul', 'ml', 'mg', 'g', 'mm', 'swabs', 'pieces', 'each']
 
@@ -504,21 +483,6 @@ class Sample(BaseSample):
             doActionFor(box, 'occupy')
         elif free_pos and state == 'occupied':
             doActionFor(box, 'liberate')
-
-    def at_post_create_script(self):
-        """Execute once the object is created (CHECK ObjectInitializedEventHandler)
-        """
-        # if self.aq_parent.Title() == 'Biospecimens':
-        #     self.container = self.getField('Project').get(self)
-        #     doActionFor(self, 'sample_due')
-        #     doActionFor(self, 'receive')
-        #
-        # create_samplepartition(self, {'services': [], 'part_id': self.getId() + "-P"})
-        #
-        # location = self.getStorageLocation()
-        # if location:
-        #     doActionFor(location, 'occupy')
-        #     self.update_box_status(location)
 
     def workflow_script_receive(self):
         super(Sample, self).workflow_script_receive()
