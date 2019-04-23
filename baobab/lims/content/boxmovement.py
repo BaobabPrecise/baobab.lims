@@ -104,8 +104,9 @@ schema = BikaSchema.copy() + Schema((
     LabContact,
     NewLocation
 ))
-schema['title'].widget.visible = {'view': 'visible', 'edit': 'visible'}
-schema['description'].widget.visible = {'view': 'visible', 'edit': 'visible'}
+schema['title'].widget.visible =True
+schema['description'].schemata = 'default'
+schema['description'].widget.visible = True
 
 
 class BoxMovement(BaseContent):
