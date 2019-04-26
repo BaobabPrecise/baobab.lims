@@ -31,7 +31,8 @@ def generateUniqueId(context, edit=False):
             brains = bc(portal_type="SampleBatch", getSubjectID=subject_id)
             suffix = '1'
             prefix = subject_id + '-' + date_created
-            suffixes = [int(brain.id.split('-')[-1]) for brain in brains if brain.id.startswith(prefix)]
+            suffixes = [int(brain.id.split('-')[-1])
+                        for brain in brains if brain.id.startswith(prefix)]
             if suffixes:
                 suffix = str(max(suffixes) + 1)
 
@@ -45,6 +46,7 @@ def generateUniqueId(context, edit=False):
         return generate(context)
     else:
         return generate(context)
+
 
 def isSubjectOrDateModified(context, subject_id, date_created):
     try:
@@ -74,5 +76,6 @@ def renameAfterEdit(obj):
 
     new_id = generateUniqueId(obj, True)
     if new_id:
-        obj.aq_inner.aq_parent.manage_renameObject(obj.id, new_id)
+        if new_id != obj.id:
+            obj.aq_inner.aq_parent.manage_renameObject(obj.id, new_id)
     return new_id

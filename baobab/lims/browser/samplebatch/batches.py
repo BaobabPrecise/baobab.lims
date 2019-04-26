@@ -24,7 +24,7 @@ class BatchesView(BikaListingView):
         self.context_actions = {}
         self.title = self.context.translate(_("Biospecimen Batches"))
         self.icon = self.portal_url + \
-                    "/++resource++baobab.lims.images/biospectype_big.png"
+            "/++resource++baobab.lims.images/biospectype_big.png"
         #self.contrifugation_date = context.getCfgDateTime().strftime("%Y/%m/%d %H:%M")
         self.description = ''
         self.show_sort_column = False
@@ -83,7 +83,7 @@ class BatchesView(BikaListingView):
                     'SerumColour',
 
                 ]
-             },
+            },
 
             {
                 'id': 'all',
@@ -129,8 +129,10 @@ class BatchesView(BikaListingView):
             short_description = ''
             description = obj.Description()
             if description and len(description) > short_description_length:
-                short_description = str(description)[:short_description_length] + ' ...'
-            items[x]['replace']['Description'] = '<span title="%s">%s</span>' % (description, short_description)
+                short_description = str(description)[
+                    :short_description_length] + ' ...'
+            items[x]['replace']['Description'] = '<span title="%s">%s</span>' % (
+                description, short_description)
             item['BatchType'] = obj.getField('BatchType').get(obj)
             item['replace']['Title'] = \
                 "<a href='%s'>%s</a>" % (item['url'], item['Title'])
@@ -139,8 +141,10 @@ class BatchesView(BikaListingView):
             except Exception as e:
                 parent_title = ''
             item['ParentBiospecimen'] = parent_title
-            item['Project'] = obj.getField('Project').get(obj).Title()
-            item['SerumColour'] = obj.getField('SerumColour').get(obj)
+            item['Project'] = obj.getField('Project').get(
+                obj).Title() if obj.getField('Project').get(obj) else ''
+            item['SerumColour'] = obj.getField('SerumColour').get(
+                obj) if obj.getField('SerumColour').get(obj) else ''
             # item['ContrifugationDate'] = obj.CfgDateTime().strftime("%Y/%m/%d %H:%M")
             item['ContrifugationDate'] = obj.getField('CfgDateTime').get(obj)
             ret.append(item)

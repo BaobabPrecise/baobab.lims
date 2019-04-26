@@ -13,10 +13,10 @@ from baobab.lims.browser.biospecimens.biospecimens import BiospecimensView
 from baobab.lims import bikaMessageFactory as _
 
 
-
 class BatchBiospecimensView(BiospecimensView):
     """ Biospecimens veiw from kit view.
     """
+
     def __init__(self, context, request):
         BiospecimensView.__init__(self, context, request, 'batch')
         self.context = context
@@ -45,6 +45,7 @@ class BatchBiospecimensView(BiospecimensView):
                     out_items.append(item)
         return out_items
 
+
 class BatchView(BrowserView):
     """The view of a single sample
     """
@@ -66,7 +67,6 @@ class BatchView(BrowserView):
 
         # self.batchID = context.getBatchId()
         self.batchType = context.getField('BatchType').get(context)
-
         self.subjectID = context.getField('SubjectID').get(context)
         self.project = "<a href='%s'>%s</a>" % (
             context.getProject().absolute_url(),
@@ -76,8 +76,8 @@ class BatchView(BrowserView):
         self.numberOfBiospecimen = context.getQuantity()
         locations = context.getField('StorageLocation').get(context)
         location_paths = [location and "<a href='%s'>%s</a>" % (
-                                 location.absolute_url(),
-                                 location.getHierarchy()) or None for location in locations]
+            location.absolute_url(),
+            location.getHierarchy()) or None for location in locations]
 
         self.location = ','.join(location_paths)
 
@@ -91,6 +91,7 @@ class BatchView(BrowserView):
             self.contrifugation_date = ''
 
         return self.template()
+
 
 class EditView(BrowserView):
 
@@ -144,9 +145,11 @@ class EditView(BrowserView):
         old_qty = int(self.context.Quantity or 0)
 
         if new_qty <= 0:
-            raise ValidationError('Quantity of samples cannot be zero or less than zero!')
+            raise ValidationError(
+                'Quantity of samples cannot be zero or less than zero!')
         if new_qty < old_qty:
-            raise ValidationError('New number of samples cannot be less than the number of samples already created!')
+            raise ValidationError(
+                'New number of samples cannot be less than the number of samples already created!')
 
     def get_biospecimen_storages(self):
         """Take a list of UIDs from the form, and resolve to a list of Storages.
@@ -155,7 +158,8 @@ class EditView(BrowserView):
         uc = getToolByName(self.context, 'uid_catalog')
         bio_storages = []
         # form_uids = self.form['StorageLocation_uid'].split(',')
-        form_uids = self.form['StorageLocation_uid'].split(',') if self.form['StorageLocation_uid'] else []
+        form_uids = self.form['StorageLocation_uid'].split(
+            ',') if self.form['StorageLocation_uid'] else []
 
         for uid in form_uids:
             brain = uc(UID=uid)[0]
@@ -173,7 +177,6 @@ class EditView(BrowserView):
         # parent_sample_uid = form['ParentBiospecimen_uid']
         # parent_samples =
 
-
         sample_type = get_first_sampletype(context)
         uc = getToolByName(context, 'uid_catalog')
 
@@ -185,7 +188,8 @@ class EditView(BrowserView):
         try:
             parent_sample_uid = form.get('ParentBiospecimen_uid')
             parent_sample = uc(UID=parent_sample_uid)[0].getObject()
-            parent_sampling_date = parent_sample.getField('SamplingDate').get(parent_sample)
+            parent_sampling_date = parent_sample.getField(
+                'SamplingDate').get(parent_sample)
         except:
             parent_sampling_date = None
 
