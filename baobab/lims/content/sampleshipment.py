@@ -301,9 +301,11 @@ class SampleShipment(ATFolder):
         client = self.getClient()
         receiver = formataddr((encode_header(client.getName()), self.getToEmailAddress()))
 
-        subject = "Samples Shipped"
-        body = "Automatic email:\n"
+        subject = "Samples Shipped: %s" % self.Title()
+        body = "Automatic email:\n\n"
+        body += 'This is an automatic email that indicates that sample shipment %s has been shipped.\n\n' % self.Title()
         body += 'The samples \"%s\" has been shipped.' % self.getStringified(self.getSamplesList())
+
         self.send_mail(sender, receiver, subject, body)
 
         self.free_storage_locations()
