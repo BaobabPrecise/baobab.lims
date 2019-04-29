@@ -563,13 +563,14 @@ class SampleBatchesExporter(object):
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
         if brains:
-            sample_batches.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
+            sample_batches.append(['Title', 'Description', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
                                  'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity'])
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
                 row = []
                 row.append(str(sample_batch.Title()))
+                row.append(str(sample_batch.Description()).rstrip())
                 row.append(sample_batch.getSubjectID())
                 parent_biospecimen_title = ''
                 parent_biospecimen = sample_batch.getParentBiospecimen()
@@ -740,7 +741,7 @@ class SampleShipmentExporter(object):
             if shipment:
                 row = []
                 row.append(shipment.Title())
-                row.append(shipment.Description())
+                row.append(str(shipment.Description()).rstrip())
                 row.append(str(shipment.getField('Volume').get(shipment)) if shipment.getField('Volume') else '')
                 row.append(str(shipment.getField('Weight').get(shipment)) if shipment.getField('Weight') else '')
                 row.append(str(shipment.getField('ShippingCost').get(shipment)) if shipment.getField('ShippingCost') else '')
@@ -751,8 +752,8 @@ class SampleShipmentExporter(object):
                 row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDelivered').get(shipment) else '')
                 row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDispatched').get(shipment)  else '')
                 row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('ShippingDate').get(shipment)  else '' )
-                row.append(str(shipment.getField('BillingAddress').get(shipment)) if shipment.getField('BillingAddress') else '')
-                row.append(str(shipment.getField('DeliveryAddress').get(shipment)))
+                row.append(str(shipment.getField('BillingAddress').get(shipment)).rstrip().replace('\r\n', ', ') if shipment.getField('BillingAddress') else '')
+                row.append(str(shipment.getField('DeliveryAddress').get(shipment)).rstrip().replace('\r\n', ', '))
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
