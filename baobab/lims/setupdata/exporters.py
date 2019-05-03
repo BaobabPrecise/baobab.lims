@@ -564,7 +564,8 @@ class SampleBatchesExporter(object):
         brains = bc(portal_type="SampleBatch")
         if brains:
             sample_batches.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
-                                 'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity'])
+                                   'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity',
+                                   'Project', 'Description'])
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
@@ -587,15 +588,23 @@ class SampleBatchesExporter(object):
                 else:
                     row.append('')
                 if sample_batch.getDateCreated():
-                    row.append(sample_batch.getDateCreated().strftime("%Y/%m/%d %H:%M"))
+                    row.append(sample_batch.getDateCreated().strftime("%Y-%m-%d %H:%M"))
                 else:
                     row.append('')
                 row.append(sample_batch.getSerumColour())
                 if sample_batch.getCfgDateTime():
-                    row.append(sample_batch.getCfgDateTime().strftime("%Y/%m/%d %H:%M"))
+                    row.append(sample_batch.getCfgDateTime().strftime("%Y-%m-%d %H:%M"))
                 else:
                     row.append('')
                 row.append(sample_batch.getQuantity())
+
+                #import pdb
+                #pdb.set_trace()
+
+                #project
+
+                #description
+
                 sample_batches.append(row)
         return sample_batches
 
@@ -628,14 +637,14 @@ class SamplesExporter(object):
                     row.append(storage.getHierarchy())
                 else:
                     row.append('')
-                row.append(sample.getSamplingDate() or '')
+                row.append(sample.getSamplingDate().strftime("%Y-%m-%d %H:%M") if sample.getSamplingDate() else '')
                 row.append(sample.getSampleState())
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
                 row.append(sample.getField('BabyNumber').get(sample))
-                row.append(sample.getField('DateCreated').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
+                row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
                 samples.append(row)
         return samples
 
@@ -673,8 +682,8 @@ class SamplesAliquotExporter(object):
                 else:
                     row.append('')
                 # row.append(sample.getField('SamplingDate').get(sample))
-                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
-                row.append(sample.getField('SamplingDate').get(sample).strftime("%Y/%m/%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
+                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                row.append(sample.getField('SamplingDate').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
 
                 aliquots.append(row)
         return aliquots
@@ -710,7 +719,7 @@ class BoxMovementExporter(object):
             else:
                 row.append('')
             if box_move.getDateCreated():
-                row.append(box_move.getDateCreated().strftime("%Y/%m/%d %H:%M"))
+                row.append(box_move.getDateCreated().strftime("%Y-%m-%d %H:%M"))
             else:
                 row.append('')
             box_movements.append(row)
@@ -748,9 +757,9 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('TrackingURL').get(shipment)) if shipment.getField('TrackingURL') else '')
                 row.append(str(shipment.getField('CourierInstructions').get(shipment)) if shipment.getField('CourierInstructions') else '')
                 row.append(str(shipment.getField('Courier').get(shipment)))
-                row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDelivered').get(shipment) else '')
-                row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('DateDispatched').get(shipment)  else '')
-                row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y/%m/%d %H:%M") if shipment.getField('ShippingDate').get(shipment)  else '' )
+                row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDelivered').get(shipment) else '')
+                row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDispatched').get(shipment)  else '')
+                row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('ShippingDate').get(shipment)  else '' )
                 row.append(str(shipment.getField('BillingAddress').get(shipment)) if shipment.getField('BillingAddress') else '')
                 row.append(str(shipment.getField('DeliveryAddress').get(shipment)))
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
