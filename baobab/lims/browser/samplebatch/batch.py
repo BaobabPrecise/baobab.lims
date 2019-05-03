@@ -125,6 +125,8 @@ class EditView(BrowserView):
 
             batch.processForm()
             self.create_samples(batch, self.form, new_qty - old_qty)
+            batch.getField('BatchId').set(batch, batch.Title())
+            batch.reindexObject()
 
             obj_url = batch.absolute_url_path()
             request.response.redirect(obj_url)
