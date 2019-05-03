@@ -563,9 +563,9 @@ class SampleBatchesExporter(object):
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
         if brains:
-            sample_batches.append(['Title', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
+            sample_batches.append(['Title', 'Description', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
                                    'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity',
-                                   'Project', 'Description'])
+                                   'Project'])
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
@@ -600,6 +600,11 @@ class SampleBatchesExporter(object):
                 row.append(sample_batch.getQuantity())
 
                 #project
+                project = sample_batch.getProject()
+                project_title = ''
+                if project:
+                    project_title = project.Title()
+                row.append(project_title)
 
                 #description
 
