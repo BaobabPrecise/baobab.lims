@@ -15,7 +15,7 @@ class ExcelWriter(object):
         self.download_dir = os.path.join(base_dir, self._DOWNLOADS_DIR)
 
         self.workbook = xlsxwriter.Workbook(
-            self.download_dir + "{}.xlsx".format(filename))
+            self.download_dir + "{}.xlsx".format(filename), {'constant_memory': True})
 
         self.bold = self.workbook.add_format({'bold': True})
 

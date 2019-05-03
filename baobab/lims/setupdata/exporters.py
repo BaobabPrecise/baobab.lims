@@ -571,6 +571,7 @@ class SampleBatchesExporter(object):
             if sample_batch:
                 row = []
                 row.append(str(sample_batch.Title()))
+                row.append(str(sample_batch.Description()).rstrip())
                 row.append(sample_batch.getSubjectID())
                 parent_biospecimen_title = ''
                 parent_biospecimen = sample_batch.getParentBiospecimen()
@@ -597,9 +598,6 @@ class SampleBatchesExporter(object):
                 else:
                     row.append('')
                 row.append(sample_batch.getQuantity())
-
-                #import pdb
-                #pdb.set_trace()
 
                 #project
 
@@ -749,7 +747,7 @@ class SampleShipmentExporter(object):
             if shipment:
                 row = []
                 row.append(shipment.Title())
-                row.append(shipment.Description())
+                row.append(str(shipment.Description()).rstrip())
                 row.append(str(shipment.getField('Volume').get(shipment)) if shipment.getField('Volume') else '')
                 row.append(str(shipment.getField('Weight').get(shipment)) if shipment.getField('Weight') else '')
                 row.append(str(shipment.getField('ShippingCost').get(shipment)) if shipment.getField('ShippingCost') else '')

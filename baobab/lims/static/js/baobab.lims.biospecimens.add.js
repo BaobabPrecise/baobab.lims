@@ -7,7 +7,7 @@ function BaobabBiospecimensView() {
         $('input[type=text]').prop('autocomplete', 'off');
 
         // SampleBatch Add/Edit page: hide the temporary batch title
-        // hideBatchTitle();
+        hideBatchTitle();
 
         // SampleBatch Add/Edit page: hide or show the colour of Plasma/Serum based on selected batch type
         var batchType = $("#BatchType :selected").text();
