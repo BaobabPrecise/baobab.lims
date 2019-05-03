@@ -1,3 +1,4 @@
+from DateTime import DateTime
 from zope.schema import ValidationError
 
 from Products.CMFCore.utils import getToolByName
@@ -57,8 +58,6 @@ class SampleView(BrowserView):
 
         # __Disable the add new menu item__ #
         context.setLocallyAllowedTypes(())
-
-        #import pdb; pdb.set_trace()
 
         # __Collect general data__ #
         self.id = context.getId()
@@ -154,7 +153,8 @@ class EditView(BrowserView):
 
             sample.getField('Unit').set(sample, request.form['Unit'])
             sample.getField('LinkedSample').set(sample, request.form['LinkedSample_uid'])
-
+            if not sample.getField('DateCreated').get(sample):
+                sample.getField('DateCreated').set(sample, DateTime())
             sample.edit(
                 SampleType=request.form['SampleType_uid']
             )
