@@ -1,3 +1,4 @@
+from DateTime import DateTime
 from zope.schema import ValidationError
 
 from Products.CMFCore.utils import getToolByName
@@ -208,6 +209,8 @@ class EditView(BrowserView):
         for storage in storages:
             storage.reindexObject()
 
+        if not sample.getField('SubjectID').get(sample):
+            sample.getField('DateCreated').set(sample, DateTime())
         return samples
 
     def get_fields_with_visibility(self, visibility, mode=None):
