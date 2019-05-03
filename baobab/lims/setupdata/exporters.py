@@ -663,8 +663,8 @@ class SamplesAliquotExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
         if brains:
-            aliquots.append(['Title', 'Sample Type', 'Sample State', 'Subject ID', 'Sample ID', 'Batch ID', 'Volume',
-                             'Unit', 'Storage', 'Frozen Time', 'Sampling Time'])
+            aliquots.append(['Title', 'Sample Type', 'Sample State', 'Subject ID', 'Batch ID', 'Volume',
+                             'Unit', 'Storage', 'Frozen Time', 'Sampling Time', 'Baby No', 'DateCreated'])
         for brain in brains:
             sample = brain.getObject()
             if sample.getField('LinkedSample').get(sample):
@@ -674,7 +674,7 @@ class SamplesAliquotExporter(object):
                 row.append(sample.getSampleType().Title())
                 row.append(sample.getSampleState())
                 row.append(sample.getField('SubjectID').get(sample))
-                row.append(sample.getField('SampleID').get(sample))
+                #row.append(sample.getField('SampleID').get(sample))
                 row.append(batch)
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
@@ -683,10 +683,12 @@ class SamplesAliquotExporter(object):
                 if storage:
                     row.append(storage.getHierarchy())
                 else:
-                    row.append('')
+                    row.append('')                
                 # row.append(sample.getField('SamplingDate').get(sample))
                 row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
                 row.append(sample.getField('SamplingDate').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
+                row.append(sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else '')
+                row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
 
                 aliquots.append(row)
         return aliquots
