@@ -176,9 +176,6 @@ class EditView(BrowserView):
     def create_samples(self, context, form, num_samples):
         """Create samples from form
         """
-        # import pdb; pdb.set_trace()
-        # parent_sample_uid = form['ParentBiospecimen_uid']
-        # parent_samples =
 
         sample_type = get_first_sampletype(context)
         uc = getToolByName(context, 'uid_catalog')
@@ -211,8 +208,6 @@ class EditView(BrowserView):
         for storage in storages:
             storage.reindexObject()
 
-        if not sample.getField('SubjectID').get(sample):
-            sample.getField('DateCreated').set(sample, DateTime())
         return samples
 
     def get_fields_with_visibility(self, visibility, mode=None):

@@ -24,7 +24,7 @@ class SampleGeneration:
         sample.setSampleType(sample_type)
         field = sample.getField('DateCreated')
         if self.form.get('DateCreated', ''):
-            field.set(sample, self.form.get('DataCreated'))
+            field.set(sample, self.form.get('DateCreated'))
         else:
             field.set(sample, DateTime())
         if kit:
