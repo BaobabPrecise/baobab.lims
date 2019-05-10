@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from bika.lims.exportimport.dataimport import SetupDataSetList as SDL
 from bika.lims.exportimport.setupdata import WorksheetImporter
 from Products.CMFPlone.utils import _createObjectByType
@@ -425,6 +427,9 @@ class ParentSample(SampleImport):
             storage_wf_state = self._wf.getInfoFor(storage_location, 'review_state')
             if storage_wf_state == 'occupied':
                 raise ExcelSheetError('Import Error Sample %s: Storage %s already occupied.' % (title, storage_location.Title()))
+        date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
+        if not date_created:
+            date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
 
         obj = _createObjectByType('Sample', project, tmpID())
         obj.edit(
@@ -438,6 +443,7 @@ class ParentSample(SampleImport):
             Volume=volume,
             Unit=row.get('Unit'),
             BabyNumber=row.get('BabyNo', ''),
+            DateCreated=date_created,
             SamplingDate=sampling_date,
             # FrozenTime=row.get('FrozenTime'),
         )
@@ -456,12 +462,16 @@ class AliquotSample(SampleImport):
 
     def create_biospecimen(self, row):
 
+
+
         barcode = str(row.get('Barcode'))
         batch_id = str(row.get('BatchID', ''))
-        brains = self._bc(portal_type='SampleBatch', Title=batch_id)
+        brains = self._bc(portal_type='SampleBatch', title=batch_id)
+
+        batch = brains[0].getObject()
 
         parent = self.get_linked_sample(str(row.get('Parent', '')))
-        project_obj = brains[0].getObject().getProject()
+        project_obj = batch.getProject()
 
         sample_type = self.get_sample_type(row.get('SampleType', ''))
         volume = self.get_volume(row.get('Volume', ''))
@@ -478,7 +488,11 @@ class AliquotSample(SampleImport):
 
         obj = _createObjectByType('Sample', project_obj, tmpID())
         field_b = obj.getField('Batch')
-        field_b.set(obj, brains[0].getObject())
+        field_b.set(obj, batch)
+
+        date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
+        if not date_created:
+            date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
 
         obj.edit(
             title=title,
@@ -491,6 +505,7 @@ class AliquotSample(SampleImport):
             Volume=volume,
             Unit=row.get('Unit'),
             # BabyNumber=row.get('BabyNo', ''),
+            DateCreated=date_created,
             LinkedSample=parent,
             SamplingDate=sampling_date,
             FrozenTime=row.get('FrozenTime'),
@@ -536,6 +551,9 @@ class SampleBatch(WorksheetImporter):
 
             batch_id = str(row.get('BatchID', ''))
             obj = _createObjectByType('SampleBatch', folder, tmpID())
+            date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
+            if not date_created:
+                date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
 
             obj.edit(
                 title=batch_id,
@@ -547,7 +565,7 @@ class SampleBatch(WorksheetImporter):
                 StorageLocation=boxes,
                 Quantity=row.get('Quantity', 0),
                 ParentBiospecimen=parent_biospecimen,
-                DateCreated=row.get('DateCreated', ''),
+                DateCreated=date_created,
                 SerumColour=row.get('SerumColour', ''),
                 CfgDateTime=row.get('CfgDateTime', ''),
             )
@@ -724,7 +742,7 @@ class Biospecimens(WorksheetImporter):
             Volume=volume,
             Unit=row.get('Unit'),
             LinkedSample=linked_sample,
-            DateCreated=row.get('DateCreated'),
+            DateCreated=row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')),
             AnatomicalSiteTerm=row.get('AnatomicalSiteTerm'),
             AnatomicalSiteDescription=row.get('AnatomicalSiteDescription'),
 
