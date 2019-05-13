@@ -667,7 +667,9 @@ class SamplesAliquotExporter(object):
                              'Unit', 'Storage', 'Frozen Time', 'Sampling Time', 'Baby No', 'DateCreated'])
         for brain in brains:
             sample = brain.getObject()
-            if sample.getField('LinkedSample').get(sample):
+            parent_sample = sample.getField('LinkedSample').get(sample)
+            if parent_sample:
+
                 batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
                 row = []
                 row.append(sample.Title())
@@ -687,7 +689,14 @@ class SamplesAliquotExporter(object):
                 # row.append(sample.getField('SamplingDate').get(sample))
                 row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
                 row.append(sample.getField('SamplingDate').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
-                row.append(sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else '')
+
+                baby_number = parent_sample.getField('BabyNumber').get(parent_sample) if parent_sample.getField('BabyNumber') else 0
+                if baby_number == 0:
+                    baby_number = sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else 0
+                if baby_number == 0:
+                    baby_number = ' '
+                row.append(baby_number)
+
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
 
                 aliquots.append(row)

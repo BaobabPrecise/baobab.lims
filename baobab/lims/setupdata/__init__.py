@@ -404,8 +404,8 @@ class SampleImport(BaobabWorksheetImporter):
                 raise ExcelSheetError('Invalid volume specified: %s' %row_volume)
             return str(float_volume)
         except Exception as e:
-            self._errors.append('Volume error has been found : %s' % str(e))
-            # raise ()
+            # self._errors.append('Volume error has been found : %s' % str(e))
+            raise ExcelSheetError('Volume error %s has been found : %s' % (row_volume, str(e)))
 
 
 class ParentSample(SampleImport):
@@ -462,15 +462,20 @@ class AliquotSample(SampleImport):
 
     def create_biospecimen(self, row):
 
-
-
         barcode = str(row.get('Barcode'))
         batch_id = str(row.get('BatchID', ''))
+
         brains = self._bc(portal_type='SampleBatch', title=batch_id)
 
-        batch = brains[0].getObject()
+        if brains:
+            batch = brains[0].getObject()
+        else:
+            raise ExcelSheetError('Import Error Sample %s: Batch %s not found.' % (barcode, batch_id))
 
         parent = self.get_linked_sample(str(row.get('Parent', '')))
+        if not parent:
+            raise ExcelSheetError('Import Error Sample %s: Parent %s not found.' % (barcode, row.get('Parent', '')))
+
         project_obj = batch.getProject()
 
         sample_type = self.get_sample_type(row.get('SampleType', ''))
@@ -493,6 +498,11 @@ class AliquotSample(SampleImport):
         date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
         if not date_created:
             date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
+
+        unit = row.get('Unit', '')
+        if not unit:
+            raise ExcelSheetError(
+                'Import Error Sample %s: Unit is a compulsory field.' % barcode)
 
         obj.edit(
             title=title,
