@@ -53,7 +53,8 @@ class ExportView(IV):
     def __call__(self):
         if 'submitted' in self.request:
             lab = self.context.bika_setup.laboratory
-            self.excel_writer = ExcelWriter()
+            self.excel_writer = ExcelWriter(self.context)
+            self.excel_writer.create_workbook()
 
             base_dir = os.path.dirname(
                 os.path.dirname(os.path.abspath(__file__)))

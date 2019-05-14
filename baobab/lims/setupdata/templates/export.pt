@@ -45,7 +45,7 @@
                                 <a href=""  tal:attributes="href string:$portal_url/++resource++baobab.lims.downloads/$file" download>
                                   Download
                                 </a>
-                                <a href="#" tal:attributes="id string:$file" tal:condition="python:myindex != 0" class="deleteExportLink"> | Delete</a>
+                                <a href="#" style="display: none" tal:attributes="id string:$file" tal:condition="python:myindex != 0" class="deleteExportLink" > | Delete</a>
                             </div>
                             <div class="deleteExportConfirmation" style="display: none">
                                 <a href="#" tal:attributes="id string:$file" class="deleteExportCornfirmed">Yes</a> or
