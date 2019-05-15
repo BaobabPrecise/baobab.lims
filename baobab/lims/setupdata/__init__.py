@@ -69,10 +69,10 @@ class BaobabWorksheetImporter(WorksheetImporter):
                 # 'Load from file') and finishes the import without errors. https://jira.bikalabs.com/browse/LIMS-1624
                 warning = "Error while loading attached file from %s. The file will not be uploaded into the system."
                 logger.warning(warning, self.sheetname)
-                self.context.plone_utils.addPortalMessage("Error while loading some attached files. "
-                                                          "The files weren't uploaded into the system.")
-                self.context.plone_utils.addPortalMessage("Another deliberate test.")
-                self.context.plone_utils.addPortalMessage("Third deliberate test.")
+                # self.context.plone_utils.addPortalMessage("Error while loading some attached files. "
+                #                                           "The files weren't uploaded into the system.")
+                # self.context.plone_utils.addPortalMessage("Another deliberate test.")
+                # self.context.plone_utils.addPortalMessage("Third deliberate test.")
         else:
             logger.info("No records found: '{0}'".format(self.sheetname))
 
@@ -530,13 +530,14 @@ class AliquotSample(SampleImport):
         ObjectInitializedEventHandler(obj, None)
 
 
-class SampleBatch(WorksheetImporter):
+class SampleBatch(BaobabWorksheetImporter):
     """ Import biospecimens
     """
 
     def Import(self):
         folder = self.context.samplebatches
         rows = self.get_rows(3)
+        self._errors = []
 
         self._pc = getToolByName(self.context, 'portal_catalog')
 
@@ -552,12 +553,22 @@ class SampleBatch(WorksheetImporter):
             # sheet_parent_biospecimen = row.get('ParentBiospecimen', '')
             # parent_biospecimen = None
             # if sheet_parent_biospecimen:
-            parent_biospecimen_list = self._pc(portal_type="Sample", Title=str(row.get('ParentBiospecimen', '')))
-            parent_biospecimen = parent_biospecimen_list and parent_biospecimen_list[0].getObject() or None
+            parent_biospecimen_text = str(row.get('ParentBiospecimen', ''))
+            if parent_biospecimen_text:
+                parent_biospecimen_list = self._pc(portal_type="Sample", Title=parent_biospecimen_text)
+                parent_biospecimen = parent_biospecimen_list and parent_biospecimen_list[0].getObject() or None
+                if not parent_biospecimen:
+                    self._errors.append('Import batch error: Parent %s was not found' % parent_biospecimen_text)
+                    continue
+            else:
+                self._errors.append('Import batch error: Parent sample cannot be blank.')
+
 
             # TODO: VERIFY IT LATER
             storage_locations = row.get('StorageLocations', '')
             boxes = self.getStorageLocations(storage_locations)
+
+            continue
 
             batch_id = str(row.get('BatchID', ''))
             obj = _createObjectByType('SampleBatch', folder, tmpID())
@@ -590,17 +601,16 @@ class SampleBatch(WorksheetImporter):
         return sample_type
 
     def getStorageLocations(self, sheet_locations):
-
         sheet_locations = sheet_locations.split(',')
-        # print(sheet_locations)
         storage_positions = []
 
         for sheet_location in sheet_locations:
             try:
-                location_brains = self._pc(portal_type='StoragePosition', Title=sheet_location)
-                if location_brains:
-                    for brain in location_brains:
-                        storage_positions.append(brain.getObject())
+                if sheet_location:
+                    location_brains = self._pc(portal_type='StoragePosition', Title=sheet_location)
+                    if location_brains:
+                        for brain in location_brains:
+                            storage_positions.append(brain.getObject())
             except:
                 continue
 
