@@ -9,6 +9,7 @@ from baobab.lims import bikaMessageFactory as _
 from baobab.lims.interfaces import IProject
 from plone.registry.interfaces import IRegistry
 from zope.component import queryUtility
+import datetime
 
 class UpdateBoxes(BrowserView):
     """
@@ -153,6 +154,16 @@ class EditView(BrowserView):
 
             sample.getField('Unit').set(sample, request.form['Unit'])
             sample.getField('LinkedSample').set(sample, request.form['LinkedSample_uid'])
+
+            membership = getToolByName(self.context, 'portal_membership')
+            if membership.isAnonymousUser():
+                member = 'anonymous'
+            else:
+                member = membership.getAuthenticatedMember().getUserName()
+
+            sample.getField('ChangeUserName').set(sample, member)
+            sample.getField('ChangeDateTime').set(sample, DateTime())
+
             if not sample.getField('DateCreated').get(sample):
                 sample.getField('DateCreated').set(sample, DateTime())
             sample.edit(
