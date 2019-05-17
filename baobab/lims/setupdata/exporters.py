@@ -638,7 +638,7 @@ class SamplesExporter(object):
         if brains:
             samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
                             'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                            'Date_Created'])
+                            'Date_Created', 'Last Modified By', 'Last Modify Date'])
         for brain in brains:
             sample = brain.getObject()
             if not sample.getField('LinkedSample').get(sample):
@@ -669,6 +669,14 @@ class SamplesExporter(object):
 
                 row.append(sample.getSampleState())
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
+
+                last_modified_user = sample.getField('ChangeUserName').get(sample)
+                last_modified_date = ''
+                if sample.getField('ChangeDateTime').get(sample):
+                    last_modified_date = sample.getField('ChangeDateTime').get(sample).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
+
                 # row.append(sample.getField('SampleID').get(sample))
 
                 samples.append(row)
@@ -688,7 +696,8 @@ class SamplesAliquotExporter(object):
         if brains:
             aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
                              'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
-                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'Sample_ID'])
+                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'Sample_ID',
+                            'Last Modified By', 'Last Modify Date'])
         for brain in brains:
             sample = brain.getObject()
             parent_sample = sample.getField('LinkedSample').get(sample)
@@ -726,6 +735,13 @@ class SamplesAliquotExporter(object):
 
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
                 row.append(sample.getField('SampleID').get(sample))
+
+                last_modified_user = sample.getField('ChangeUserName').get(sample)
+                last_modified_date = ''
+                if sample.getField('ChangeDateTime').get(sample):
+                    last_modified_date = sample.getField('ChangeDateTime').get(sample).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
 
                 aliquots.append(row)
         return aliquots
