@@ -238,10 +238,12 @@ class Storage_Types(WorksheetImporter):
         for row in rows:
             title = row.get('title')
             description = row.get('description', '')
+            Temperature = row.get('Temperature')
             obj = _createObjectByType('StorageType', folder, tmpID())
             obj.edit(
                 title=title,
-                description=description
+                description=description,
+                Temperature=Temperature
             )
             obj.unmarkCreationFlag()
             renameAfterCreation(obj)
