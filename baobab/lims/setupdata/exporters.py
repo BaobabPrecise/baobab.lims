@@ -638,7 +638,7 @@ class SamplesExporter(object):
         if brains:
             samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
                             'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                            'Date_Created', 'Last Modified By', 'Last Modify Date'])
+                            'Date_Created', 'Last_Modified_By', 'Last_Modified_Date'])
         for brain in brains:
             sample = brain.getObject()
             if not sample.getField('LinkedSample').get(sample):
@@ -697,7 +697,7 @@ class SamplesAliquotExporter(object):
             aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
                              'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
                              'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'Sample_ID',
-                            'Last Modified By', 'Last Modify Date'])
+                            'Last_Modified_By', 'Last_Modified_Date'])
         for brain in brains:
             sample = brain.getObject()
             parent_sample = sample.getField('LinkedSample').get(sample)
