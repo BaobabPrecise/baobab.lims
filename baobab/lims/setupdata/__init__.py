@@ -238,10 +238,12 @@ class Storage_Types(WorksheetImporter):
         for row in rows:
             title = row.get('title')
             description = row.get('description', '')
+            Temperature = row.get('Temperature')
             obj = _createObjectByType('StorageType', folder, tmpID())
             obj.edit(
                 title=title,
-                description=description
+                description=description,
+                Temperature=Temperature
             )
             obj.unmarkCreationFlag()
             renameAfterCreation(obj)
@@ -797,10 +799,33 @@ class Storage(WorksheetImporter):
                 print "parent not found for %s" % hierarchy
                 continue
 
+
+
+
+
             storage_obj = _createObjectByType(storage_type, parent, row.get('id'))
             storage_obj.edit(
                 title=title,
             )
+
+            if storage_type == 'StorageUnit':
+                bsc = getToolByName(self.context, 'bika_setup_catalog')
+                facilities = bsc(portal_type="Department", title=row.get('Department'))
+                facility = facilities and facilities[0].getObject() or None
+                storage_types = bsc(portal_type="StorageType", title=row.get('StorageTypes'))
+                storage_type = storage_types and storage_types[0].getObject() or None
+                
+                temperature = None
+                if storage_type:
+                    temperature = storage_type.getField('Temperature').get(storage_type)
+
+
+                storage_obj.edit(
+                    Department=facility,
+                    UnitType=storage_type,
+                    Temperature=temperature,
+                )
+
 
             if storage_type == 'UnmanagedStorage':
                 alsoProvides(storage_obj, IStockItemStorage)
@@ -863,7 +888,7 @@ class StockItems(WorksheetImporter):
 
             st_loc_list = pc(portal_type='UnmanagedStorage', Title=row.get('StorageLocation'))
             storage_location = st_loc_list and st_loc_list[0].getObject() or None
-            
+
             obj = _createObjectByType('StockItem', folder, tmpID())
             obj.edit(
                 Product=product,
@@ -882,4 +907,3 @@ class StockItems(WorksheetImporter):
 
             obj.unmarkCreationFlag()
             renameAfterCreation(obj)
-
