@@ -292,6 +292,22 @@ class SampleSchemaExtender(object):
             )
         ),
         ExtStringField(
+            'ChangeUserName',
+            widget=StringWidget(
+                label=_('ChangeUserName'),
+                description=_('The user who created or last made a change to this sample.'),
+                visible={'view': 'invisible', 'edit': 'invisible'}
+            )
+        ),
+        ExtDateTimeField(
+            'ChangeDateTime',
+            widget=StringWidget(
+                label=_('ChangeDateTime'),
+                description=_('The date and time when the sample was created or last updated.'),
+                visible={'view': 'invisible', 'edit': 'invisible'}
+            )
+        ),
+        ExtStringField(
             'Unit',
             required=1,
             default="",
