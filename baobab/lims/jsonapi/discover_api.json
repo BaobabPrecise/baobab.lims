@@ -207,8 +207,14 @@
                     "required": "false",
                     "type": "boolean",
                     "description": "One or zero indicating if this sample is dangerous or not"
+                },
+                {
+                    "name": "HasBabyNumber",
+                    "required": "false",
+                    "type": "boolean",
+                    "description": "One or zero indicating if this sample has a baby number or not"
                 }
-            ]
+           ]
         },
         "DiseaseOntology": {
             "url": ".../@@api/v3/[action]/[uid]",

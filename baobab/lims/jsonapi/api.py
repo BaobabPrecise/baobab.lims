@@ -439,6 +439,7 @@ def create_sample_type(container, portal_type, **data):
         "Hazardous": data.get("Hazardous"),
         "Prefix": data.get('Prefix'),
         "MinimumVolume": data.get('MinimumVolume'),
+        "HasBabyNumber": data.get('HasBabyNumber'),
     }
 
     return create_smp_type(container, request, values)

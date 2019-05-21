@@ -19,6 +19,7 @@ def create_sample_type(context, request, values):
         #SampleMatrix=samplematrix,
         Prefix=values['Prefix'],
         MinimumVolume=values['MinimumVolume'],
+        HasBabyNumber=to_bool(values['HasBabyNumber']),
         #ContainerType=containertype
     )
 
