@@ -396,43 +396,57 @@ class SampleTypesExporter(object):
 
         pc = getToolByName(self.context, 'portal_catalog')
         sample_type_brains = pc(portal_type="SampleType")
-        print('===brains========')
+        # print('===brains========')
+        if sample_type_brains:
+            list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume', 'HasBabyNumber'])
 
         for brain in sample_type_brains:
             sample_type = brain.getObject()
             # print('-------------------')
             # print(sample.__dict__)
-            dict = {}
-            dict['Title'] = sample_type.Title()
-            dict['Description'] = sample_type.Description()
-            # dict['RetentionPeriod'] = sample_type.getField('RetentionPeriod').get(sample_type)
-            dict['Hazardous'] = sample_type.getField('Hazardous').get(sample_type)
-            dict['Prefix'] = sample_type.getField('Prefix').get(sample_type)
-            dict['MinimumVolume'] = sample_type.getField('MinimumVolume').get(sample_type)
+            # dict = {}
+            # dict['Title'] = sample_type.Title()
+            # dict['Description'] = sample_type.Description()
+            # # dict['RetentionPeriod'] = sample_type.getField('RetentionPeriod').get(sample_type)
+            # dict['Hazardous'] = sample_type.getField('Hazardous').get(sample_type)
+            # dict['Prefix'] = sample_type.getField('Prefix').get(sample_type)
+            # dict['MinimumVolume'] = sample_type.getField('MinimumVolume').get(sample_type)
+            #
+            # dict['UID'] = sample_type.UID()
+            # try:
+            #     dict['Parent_UID'] = sample_type.aq_parent.UID()
+            # except:
+            #     dict['Parent_UID'] = ''
 
-            dict['UID'] = sample_type.UID()
-            try:
-                dict['Parent_UID'] = sample_type.aq_parent.UID()
-            except:
-                dict['Parent_UID'] = ''
+            row = []
+            row.append(str(sample_type.Title()))
+            row.append(str(sample_type.Description()).rstrip())
+            row.append(sample_type.getField('Hazardous').get(sample_type))
+            row.append(sample_type.getField('Prefix').get(sample_type))
+            row.append(sample_type.getField('MinimumVolume').get(sample_type))
+            row.append(sample_type.getField('HasBabyNumber').get(sample_type))
+            # row.append(sample_type.UID())
+            # row.append(sample_type.aq_parent.UID() if sample_type.aq_parent.UID() else '')
 
-            list_of_sample_types.append(dict)
+            # list_of_sample_types.append(dict)
+            list_of_sample_types.append(row)
 
-        return self.get_headings(), list_of_sample_types
+        # return self.get_headings(), list_of_sample_types
+        return list_of_sample_types
 
-    def get_headings(self):
-        headings = [
-            'Title',
-            'Description',
-            # 'RetentionPeriod',
-            'Hazardous',
-            'Prefix',
-            'MinimumVolume',
-            'UID',
-            'Parent_UID',
-        ]
-
-        return headings
+    # def get_headings(self):
+    #     headings = [
+    #         'Title',
+    #         'Description',
+    #         # 'RetentionPeriod',
+    #         'Hazardous',
+    #         'Prefix',
+    #         'MinimumVolume',
+    #         'UID',
+    #         'Parent_UID',
+    #     ]
+    #
+    #     return headings
 
 
 class ClientsExporter(object):
@@ -563,15 +577,24 @@ class SampleBatchesExporter(object):
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
         if brains:
-            sample_batches.append(['Title', 'Description', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
-                                   'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity',
+            sample_batches.append(['Title', 'Description', 'SubjectID', 'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Batch_Type',
+                                   'Storage_Locations', 'Date_Created', 'Serum_Colour', 'Cfg_Time', 'Quantity',
                                    'Project', 'Last Modified By', 'Last Modify Date'])
+
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
                 row = []
                 row.append(str(sample_batch.Title()))
                 row.append(str(sample_batch.Description()).rstrip())
+
+                # project
+                project = sample_batch.getProject()
+                project_title = ''
+                if project:
+                    project_title = project.Title()
+                row.append(project_title)
+
                 row.append(sample_batch.getSubjectID())
                 parent_biospecimen_title = ''
                 parent_biospecimen = sample_batch.getParentBiospecimen()
@@ -629,9 +652,9 @@ class SamplesExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
         if brains:
-            samples.append(['Title', 'Project (or Visit type)', 'Sample Type','Storage Location', 'Sampling Date',
-                            'Sample State', 'Subject ID', 'Barcode (or Kit ID)', 'Volume', 'Unit', 'Baby No.',
-                            'Date Created', 'Last Modified By', 'Last Modify Date'])
+            samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
+                            'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
+                            'Date_Created', 'Last_Modified_By', 'Last_Modified_Date'])
         for brain in brains:
             sample = brain.getObject()
             if not sample.getField('LinkedSample').get(sample):
@@ -647,12 +670,20 @@ class SamplesExporter(object):
                 else:
                     row.append('')
                 row.append(sample.getSamplingDate().strftime("%Y-%m-%d %H:%M") if sample.getSamplingDate() else '')
-                row.append(sample.getSampleState())
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
-                row.append(sample.getField('BabyNumber').get(sample))
+                # row.append(sample.getField('BabyNumber').get(sample))
+
+                baby_number = sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else ''
+                if baby_number == '0' or baby_number == 0:
+                    baby_number = ''
+                # print "Parent - babynumber type: " + str(type(baby_number))
+                # print "Parent - babynumber value: " + str(baby_number)
+                row.append(baby_number)
+
+                row.append(sample.getSampleState())
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
@@ -661,6 +692,8 @@ class SamplesExporter(object):
                     last_modified_date = sample.getField('ChangeDateTime').get(sample).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
+
+                # row.append(sample.getField('SampleID').get(sample))
 
                 samples.append(row)
         return samples
@@ -677,9 +710,10 @@ class SamplesAliquotExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
         if brains:
-            aliquots.append(['Title', 'Sample Type', 'Sample State', 'Subject ID', 'Batch ID', 'Volume',
-                             'Unit', 'Storage', 'Frozen Time', 'Sampling Time', 'Baby No', 'DateCreated',
-                            'Last Modified By', 'Last Modify Date'])
+            aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
+                             'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
+                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'Sample_ID',
+                            'Last_Modified_By', 'Last_Modified_Date'])
         for brain in brains:
             sample = brain.getObject()
             parent_sample = sample.getField('LinkedSample').get(sample)
@@ -689,10 +723,8 @@ class SamplesAliquotExporter(object):
                 row = []
                 row.append(sample.Title())
                 row.append(sample.getSampleType().Title())
-                row.append(sample.getSampleState())
                 row.append(sample.getField('SubjectID').get(sample))
-                #row.append(sample.getField('SampleID').get(sample))
-                row.append(batch)
+                row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
                 row.append(sample.getField('Unit').get(sample))
 
@@ -703,16 +735,22 @@ class SamplesAliquotExporter(object):
                     row.append('')                
                 # row.append(sample.getField('SamplingDate').get(sample))
                 row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                row.append(sample.getSampleState())
                 row.append(sample.getField('SamplingDate').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
+                row.append(parent_sample.getField('Barcode').get(parent_sample))
+                row.append(batch)
 
-                baby_number = parent_sample.getField('BabyNumber').get(parent_sample) if parent_sample.getField('BabyNumber') else 0
-                if baby_number == 0:
-                    baby_number = sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else 0
-                if baby_number == 0:
+                baby_number = parent_sample.getField('BabyNumber').get(parent_sample) if parent_sample.getField('BabyNumber') else ''
+                # if baby_number == 0:
+                #     baby_number = sample.getField('BabyNumber').get(sample) if sample.getField('BabyNumber') else 0
+                if baby_number == '0' or baby_number == 0:
                     baby_number = ' '
+                # print "Aliquot - babynumber type: " + str(type(baby_number))
+                # print "Aliquot - babynumber value: " + str(baby_number)
                 row.append(baby_number)
 
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
+                row.append(sample.getField('SampleID').get(sample))
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
@@ -736,8 +774,12 @@ class BoxMovementExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="BoxMovement")
         if brains:
+<<<<<<< HEAD
             box_movements.append(['Title', 'Description', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved',
                             'Last Modified By', 'Last Modify Date'])
+=======
+            box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved'])
+>>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
 
         for brain in brains:
             box_move = brain.getObject()
@@ -784,10 +826,17 @@ class SampleShipmentExporter(object):
         brains = pc(portal_type="SampleShipment")
 
         if brains:
+<<<<<<< HEAD
             sample_shipments.append(['Title', 'Description', 'Volume','Weight', 'Shipping Cost', 'Shipping Conditions',
                                      'Tracking URL', 'Courier Instructions', 'Courier', 'Date Delivered', 'Date Dispatched',
                                      'Shipping Date', 'Billing Address', 'Delivery Address', 'Client', 'Receiver Email Address',
                                      'Sender Email Address', 'Samples', 'Last Modified By', 'Last Modify Date'])
+=======
+            sample_shipments.append(['Title', 'Description', 'Date_Delivered', 'Date_Dispatched',
+                                     'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
+                                     'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
+                                     'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address'])
+>>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
 
         for brain in brains:
             shipment = brain.getObject()
@@ -795,6 +844,10 @@ class SampleShipmentExporter(object):
                 row = []
                 row.append(shipment.Title())
                 row.append(str(shipment.Description()).rstrip())
+                row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDelivered').get(shipment) else '')
+                row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDispatched').get(shipment) else '')
+                row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('ShippingDate').get(shipment) else '')
+                row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
                 row.append(str(shipment.getField('Volume').get(shipment)) if shipment.getField('Volume') else '')
                 row.append(str(shipment.getField('Weight').get(shipment)) if shipment.getField('Weight') else '')
                 row.append(str(shipment.getField('ShippingCost').get(shipment)) if shipment.getField('ShippingCost') else '')
@@ -802,14 +855,12 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('TrackingURL').get(shipment)) if shipment.getField('TrackingURL') else '')
                 row.append(str(shipment.getField('CourierInstructions').get(shipment)) if shipment.getField('CourierInstructions') else '')
                 row.append(str(shipment.getField('Courier').get(shipment)))
-                row.append(shipment.getField('DateDelivered').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDelivered').get(shipment) else '')
-                row.append(shipment.getField('DateDispatched').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('DateDispatched').get(shipment)  else '')
-                row.append(shipment.getField('ShippingDate').get(shipment).strftime("%Y-%m-%d %H:%M") if shipment.getField('ShippingDate').get(shipment)  else '' )
                 row.append(str(shipment.getField('BillingAddress').get(shipment)) if shipment.getField('BillingAddress') else '')
                 row.append(str(shipment.getField('DeliveryAddress').get(shipment)))
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
+<<<<<<< HEAD
                 row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
 
                 last_modified_user = shipment.getField('ChangeUserName').get(shipment)
@@ -818,6 +869,8 @@ class SampleShipmentExporter(object):
                     last_modified_date = shipment.getField('ChangeDateTime').get(shipment).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
+=======
+>>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
 
                 sample_shipments.append(row)
         return sample_shipments
