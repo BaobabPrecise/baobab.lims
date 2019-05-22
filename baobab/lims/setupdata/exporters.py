@@ -264,7 +264,7 @@ class AnalysisServicesExporter(object):
 
         bsc = getToolByName(self.context, 'bika_setup_catalog')
         analysis_service_brains = bsc(portal_type="AnalysisService")
-        print('===brains========')
+        # print('===brains========')
 
         for brain in analysis_service_brains:
             analysis_service = brain.getObject()
@@ -461,7 +461,7 @@ class ClientsExporter(object):
 
         pc = getToolByName(self.context, 'portal_catalog')
         client_brains = pc(portal_type="Client")
-        print('===brains========')
+        # print('===brains========')
 
         for brain in client_brains:
             client = brain.getObject()
@@ -516,7 +516,7 @@ class ProjectsExporter(object):
 
         pc = getToolByName(self.context, 'portal_catalog')
         project_brains = pc(portal_type="Project")
-        print('===brains========')
+        # print('===brains========')
 
         for brain in project_brains:
             project = brain.getObject()
@@ -577,9 +577,9 @@ class SampleBatchesExporter(object):
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
         if brains:
-            sample_batches.append(['Title', 'Description', 'SubjectID', 'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Batch_Type',
-                                   'Storage_Locations', 'Date_Created', 'Serum_Colour', 'Cfg_Time', 'Quantity',
-                                   'Project', 'Last Modified By', 'Last Modify Date'])
+            sample_batches.append(['Title', 'Description', 'Project', 'Subject_ID', 'Parent_Biospecimen_Kit_ID',
+                                   'Batch_ID', 'Batch_Type', 'Storage_Locations', 'Date_Created', 'Serum_Colour',
+                                   'Cfg_Time', 'Quantity', 'Last Modified By', 'Last Modify Date'])
 
         for brain in brains:
             sample_batch = brain.getObject()
@@ -774,12 +774,9 @@ class BoxMovementExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="BoxMovement")
         if brains:
-<<<<<<< HEAD
-            box_movements.append(['Title', 'Description', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved',
+            box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved',
                             'Last Modified By', 'Last Modify Date'])
-=======
-            box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved'])
->>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
+
 
         for brain in brains:
             box_move = brain.getObject()
@@ -826,17 +823,11 @@ class SampleShipmentExporter(object):
         brains = pc(portal_type="SampleShipment")
 
         if brains:
-<<<<<<< HEAD
-            sample_shipments.append(['Title', 'Description', 'Volume','Weight', 'Shipping Cost', 'Shipping Conditions',
-                                     'Tracking URL', 'Courier Instructions', 'Courier', 'Date Delivered', 'Date Dispatched',
-                                     'Shipping Date', 'Billing Address', 'Delivery Address', 'Client', 'Receiver Email Address',
-                                     'Sender Email Address', 'Samples', 'Last Modified By', 'Last Modify Date'])
-=======
             sample_shipments.append(['Title', 'Description', 'Date_Delivered', 'Date_Dispatched',
                                      'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
                                      'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
-                                     'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address'])
->>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
+                                     'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address',
+                                     'Last Modified By', 'Last Modify Date'])
 
         for brain in brains:
             shipment = brain.getObject()
@@ -860,7 +851,6 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
-<<<<<<< HEAD
                 row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
 
                 last_modified_user = shipment.getField('ChangeUserName').get(shipment)
@@ -869,8 +859,6 @@ class SampleShipmentExporter(object):
                     last_modified_date = shipment.getField('ChangeDateTime').get(shipment).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
-=======
->>>>>>> 1126b1a63ef997fea40a6e0a1586b76724e5b592
 
                 sample_shipments.append(row)
         return sample_shipments
@@ -889,7 +877,7 @@ class AnalysisRequestsExporter(object):
 
         pc = getToolByName(self.context, 'portal_catalog')
         analysis_request_brains = pc(portal_type="AnalysisRequest")
-        print('===brains========')
+        # print('===brains========')
 
         for brain in analysis_request_brains:
             analysis_request = brain.getObject()
