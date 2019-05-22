@@ -123,6 +123,18 @@ class EditView(BrowserView):
             old_qty = int(batch.Quantity or 0)
             new_qty = int(self.form.get('Quantity', 0))
 
+            membership = getToolByName(self.context, 'portal_membership')
+            if membership.isAnonymousUser():
+                member = 'anonymous'
+            else:
+                member = membership.getAuthenticatedMember().getUserName()
+
+            batch.getField('ChangeUserName').set(batch, member)
+            batch.getField('ChangeDateTime').set(batch, DateTime())
+
+            if not batch.getField('DateCreated').get(batch):
+                batch.getField('DateCreated').set(batch, DateTime())
+
             batch.processForm()
             self.create_samples(batch, self.form, new_qty - old_qty)
             batch.getField('BatchId').set(batch, batch.Title())

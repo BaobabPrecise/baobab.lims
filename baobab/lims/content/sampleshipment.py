@@ -203,7 +203,22 @@ schema = BikaFolderSchema.copy() + BikaSchema.copy() + Schema((
             size=30,
         )
     ),
-
+    StringField(
+        'ChangeUserName',
+        widget=StringWidget(
+            label=_('ChangeUserName'),
+            description=_('The user who created or last made a change to this sample.'),
+            visible={'view': 'invisible', 'edit': 'invisible'}
+        )
+    ),
+    DateTimeField(
+        'ChangeDateTime',
+        widget=StringWidget(
+            label=_('ChangeDateTime'),
+            description=_('The date and time when the sample was created or last updated.'),
+            visible={'view': 'invisible', 'edit': 'invisible'}
+        )
+    ),
 ))
 
 schema['title'].widget.visible = True

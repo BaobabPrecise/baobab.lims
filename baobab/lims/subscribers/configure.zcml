@@ -40,4 +40,16 @@
         handler=".boxmovement.ObjectModifiedEventHandler"
     />
 
+    <subscriber
+        for="baobab.lims.interfaces.ISampleShipment
+             Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler=".sampleshipment.ObjectInitializedEventHandler"
+    />
+
+    <subscriber
+        for="baobab.lims.interfaces.ISampleShipment
+             Products.Archetypes.interfaces.IObjectEditedEvent"
+        handler=".sampleshipment.ObjectModifiedEventHandler"
+    />
+
 </configure>

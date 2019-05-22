@@ -76,6 +76,15 @@ class BaobabWorksheetImporter(WorksheetImporter):
         else:
             logger.info("No records found: '{0}'".format(self.sheetname))
 
+    def get_member(self):
+        membership = getToolByName(self.context, 'portal_membership')
+        if membership.isAnonymousUser():
+            member = 'anonymous'
+        else:
+            member = membership.getAuthenticatedMember().getUserName()
+
+        return member
+
 
 class Products(WorksheetImporter):
     """ Import test products
@@ -393,9 +402,6 @@ class SampleImport(BaobabWorksheetImporter):
         if existing_sample:
             raise ExcelSheetError('Sample with title or barcode %s already exists.' % title)
 
-
-
-
     def get_volume(self, row_volume):
         try:
             volume = str(row_volume)
@@ -430,6 +436,7 @@ class ParentSample(SampleImport):
         date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
         if not date_created:
             date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
+        member = self.get_member()
 
         obj = _createObjectByType('Sample', project, tmpID())
         obj.edit(
@@ -446,6 +453,8 @@ class ParentSample(SampleImport):
             DateCreated=date_created,
             SamplingDate=sampling_date,
             # FrozenTime=row.get('FrozenTime'),
+            ChangeUserName=member,
+            ChangeDateTime=date_created,
         )
 
         obj.reindexObject()
@@ -503,6 +512,7 @@ class AliquotSample(SampleImport):
         if not unit:
             raise ExcelSheetError(
                 'Import Error Sample %s: Unit is a compulsory field.' % barcode)
+        member = self.get_member()
 
         obj.edit(
             title=title,
@@ -519,6 +529,8 @@ class AliquotSample(SampleImport):
             LinkedSample=parent,
             SamplingDate=sampling_date,
             FrozenTime=row.get('FrozenTime'),
+            ChangeUserName=member,
+            ChangeDateTime=date_created,
         )
 
         obj.reindexObject()
@@ -563,18 +575,17 @@ class SampleBatch(BaobabWorksheetImporter):
             else:
                 self._errors.append('Import batch error: Parent sample cannot be blank.')
 
-
             # TODO: VERIFY IT LATER
             storage_locations = row.get('StorageLocations', '')
             boxes = self.getStorageLocations(storage_locations)
-
-            continue
 
             batch_id = str(row.get('BatchID', ''))
             obj = _createObjectByType('SampleBatch', folder, tmpID())
             date_created = row.get('DateCreated', datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M'))
             if not date_created:
                 date_created = datetime.strftime(datetime.now(), '%Y-%m-%d %H:%M')
+
+            member = self.get_member()
 
             obj.edit(
                 title=batch_id,
@@ -589,6 +600,8 @@ class SampleBatch(BaobabWorksheetImporter):
                 DateCreated=date_created,
                 SerumColour=row.get('SerumColour', ''),
                 CfgDateTime=row.get('CfgDateTime', ''),
+                ChangeUserName=member,
+                ChangeDateTime=date_created,
             )
             # import pdb;pdb.set_trace()
             obj.reindexObject()

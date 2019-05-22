@@ -565,7 +565,7 @@ class SampleBatchesExporter(object):
         if brains:
             sample_batches.append(['Title', 'Description', 'SubjectID', 'ParentBiospecimen', 'BatchID', 'BatchType',
                                    'StorageLocations', 'DateCreated', 'SerumColour', 'CfgDateTime', 'Quantity',
-                                   'Project'])
+                                   'Project', 'Last Modified By', 'Last Modify Date'])
         for brain in brains:
             sample_batch = brain.getObject()
             if sample_batch:
@@ -606,6 +606,12 @@ class SampleBatchesExporter(object):
                     project_title = project.Title()
                 row.append(project_title)
 
+                last_modified_user = sample_batch.getField('ChangeUserName').get(sample_batch)
+                last_modified_date = ''
+                if sample_batch.getField('ChangeDateTime').get(sample_batch):
+                    last_modified_date = sample_batch.getField('ChangeDateTime').get(sample_batch).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
                 #description
 
                 sample_batches.append(row)
@@ -730,7 +736,8 @@ class BoxMovementExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="BoxMovement")
         if brains:
-            box_movements.append(['Title', 'Description', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved'])
+            box_movements.append(['Title', 'Description', 'Old Location', 'LabContact', 'NewLocation', 'Date Moved',
+                            'Last Modified By', 'Last Modify Date'])
 
         for brain in brains:
             box_move = brain.getObject()
@@ -752,6 +759,14 @@ class BoxMovementExporter(object):
                 row.append(box_move.getDateCreated().strftime("%Y-%m-%d %H:%M"))
             else:
                 row.append('')
+
+            last_modified_user = box_move.getField('ChangeUserName').get(box_move)
+            last_modified_date = ''
+            if box_move.getField('ChangeDateTime').get(box_move):
+                last_modified_date = box_move.getField('ChangeDateTime').get(box_move).strftime("%Y-%m-%d %H:%M")
+            row.append(last_modified_user)
+            row.append(last_modified_date)
+
             box_movements.append(row)
         return box_movements
 
@@ -772,7 +787,7 @@ class SampleShipmentExporter(object):
             sample_shipments.append(['Title', 'Description', 'Volume','Weight', 'Shipping Cost', 'Shipping Conditions',
                                      'Tracking URL', 'Courier Instructions', 'Courier', 'Date Delivered', 'Date Dispatched',
                                      'Shipping Date', 'Billing Address', 'Delivery Address', 'Client', 'Receiver Email Address',
-                                     'Sender Email Address', 'Samples'])
+                                     'Sender Email Address', 'Samples', 'Last Modified By', 'Last Modify Date'])
 
         for brain in brains:
             shipment = brain.getObject()
@@ -796,6 +811,14 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
                 row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
+
+                last_modified_user = shipment.getField('ChangeUserName').get(shipment)
+                last_modified_date = ''
+                if shipment.getField('ChangeDateTime').get(shipment):
+                    last_modified_date = shipment.getField('ChangeDateTime').get(shipment).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
+
                 sample_shipments.append(row)
         return sample_shipments
 

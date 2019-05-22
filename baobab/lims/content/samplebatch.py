@@ -211,6 +211,24 @@ CfgDateTime = DateTimeField(
     )
 )
 
+ChangeUserName = StringField(
+    'ChangeUserName',
+    widget=StringWidget(
+        label=_('ChangeUserName'),
+        description=_('The user who created or last made a change to this sample.'),
+        visible={'view': 'invisible', 'edit': 'invisible'}
+    )
+)
+
+ChangeDateTime = DateTimeField(
+    'ChangeDateTime',
+    widget=StringWidget(
+        label=_('ChangeDateTime'),
+        description=_('The date and time when the sample was created or last updated.'),
+        visible={'view': 'invisible', 'edit': 'invisible'}
+    )
+)
+
 schema = BikaSchema.copy() + Schema((
     BatchId,
     BatchType,
@@ -221,7 +239,9 @@ schema = BikaSchema.copy() + Schema((
     Location,
     DateCreation,
     SerumColour,
-    CfgDateTime
+    CfgDateTime,
+    ChangeUserName,
+    ChangeDateTime,
 ))
 
 schema['title'].widget.visible = {'edit': 'visible', 'view': 'visible'}
