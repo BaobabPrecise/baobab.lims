@@ -1,7 +1,6 @@
 from Products.CMFCore.utils import getToolByName
 from bika.lims.utils import to_utf8
 
-
 class LabDataExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
     """
@@ -398,7 +397,8 @@ class SampleTypesExporter(object):
         sample_type_brains = pc(portal_type="SampleType")
         # print('===brains========')
         if sample_type_brains:
-            list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume', 'HasBabyNumber'])
+            list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume',
+                                         'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path'])
 
         for brain in sample_type_brains:
             sample_type = brain.getObject()
@@ -417,19 +417,22 @@ class SampleTypesExporter(object):
             #     dict['Parent_UID'] = sample_type.aq_parent.UID()
             # except:
             #     dict['Parent_UID'] = ''
+            if sample_type:
+                row = []
+                row.append(str(sample_type.Title()))
+                row.append(str(sample_type.Description()).rstrip())
+                row.append(sample_type.getField('Hazardous').get(sample_type))
+                row.append(sample_type.getField('Prefix').get(sample_type))
+                row.append(sample_type.getField('MinimumVolume').get(sample_type))
+                row.append(sample_type.getField('HasBabyNumber').get(sample_type))
+                row.append(sample_type.getId() if sample_type.getId() else '')
+                row.append(sample_type.UID())
+                row.append(sample_type.aq_parent.UID() if sample_type.aq_parent.UID() else '')
+                # row.append(sample_type.absolute_url() if sample_type.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
 
-            row = []
-            row.append(str(sample_type.Title()))
-            row.append(str(sample_type.Description()).rstrip())
-            row.append(sample_type.getField('Hazardous').get(sample_type))
-            row.append(sample_type.getField('Prefix').get(sample_type))
-            row.append(sample_type.getField('MinimumVolume').get(sample_type))
-            row.append(sample_type.getField('HasBabyNumber').get(sample_type))
-            # row.append(sample_type.UID())
-            # row.append(sample_type.aq_parent.UID() if sample_type.aq_parent.UID() else '')
-
-            # list_of_sample_types.append(dict)
-            list_of_sample_types.append(row)
+                # list_of_sample_types.append(dict)
+                list_of_sample_types.append(row)
 
         # return self.get_headings(), list_of_sample_types
         return list_of_sample_types
@@ -517,19 +520,61 @@ class ProjectsExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         project_brains = pc(portal_type="Project")
         # print('===brains========')
+        if project_brains:
+            list_of_projects.append(['Title', 'Description', 'StudyType', 'EthicsFormLink', 'AgeHigh', 'AgeLow',
+                                     'NumParticipants', 'Biospecimen_Types', 'Client', 'Client_ID',
+                                     'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path', 'Portal_URL'])
 
+        portal_url = getToolByName(self.context, "portal_url").getPortalObject().absolute_url()
         for brain in project_brains:
             project = brain.getObject()
             # print('-------------------')
             # print(sample.__dict__)
-            dict = {}
-            dict['Title'] = project.Title()
-            dict['Description'] = project.Description()
-            dict['StudyType'] = project.getField('StudyType').get(project)
-            dict['EthicsFormLink'] = project.getField('EthicsFormLink').get(project)
-            dict['AgeHigh'] = project.getField('AgeHigh').get(project)
-            dict['AgeLow'] = project.getField('AgeLow').get(project)
-            dict['NumParticipants'] = project.getField('NumParticipants').get(project)
+            if project:
+                row = []
+                row.append(str(project.Title()))
+                row.append(str(project.Description()).rstrip())
+                row.append(str(project.getField('StudyType').get(project)))
+                row.append(str(project.getField('EthicsFormLink').get(project)))
+                row.append(project.getField('AgeHigh').get(project))
+                row.append(project.getField('AgeLow').get(project))
+                row.append(project.getField('NumParticipants').get(project))
+                # row.append(str(project.getField('SampleType').get(project)) if project.getField('SampleType').get(project) else '')
+                pc = getToolByName(self.context, 'portal_catalog')
+                biospecimen_types = project.getField('SampleType').get(project)
+                biospecimen_titles = []
+                if biospecimen_types:
+                    for sample_type_uid in biospecimen_types:
+                        for i in pc(portal_type='SampleType', inactive_state='active'):
+                            if i.UID == sample_type_uid:
+                                biospecimen_titles.append(i.Title)
+                                break
+                row.append(str(biospecimen_titles))
+
+                row.append(project.aq_parent.Title() if project.aq_parent.Title() else '')
+                row.append(project.getClientID() if project.getClientID() else '')
+                row.append(project.getField('DateCreated').get(project).strftime("%Y-%m-%d %H:%M") if project.getField('DateCreated').get(project) else '')
+
+                row.append(str(project.getId()))
+                row.append(project.UID())
+                row.append(project.aq_parent.UID() if project.aq_parent.UID() else '')
+                # row.append(project.absolute_url() if project.absolute_url() else '')
+                # row.append(brain.getURL()[len(portal_url):] if brain.getURL() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
+                row.append(portal_url)
+
+                # from plone import api
+                # print "api.portal.get().absolute_url(): " + api.portal.get().absolute_url()
+
+                list_of_projects.append(row)
+            # dict = {}
+            # dict['Title'] = project.Title()
+            # dict['Description'] = project.Description()
+            # dict['StudyType'] = project.getField('StudyType').get(project)
+            # dict['EthicsFormLink'] = project.getField('EthicsFormLink').get(project)
+            # dict['AgeHigh'] = project.getField('AgeHigh').get(project)
+            # dict['AgeLow'] = project.getField('AgeLow').get(project)
+            # dict['NumParticipants'] = project.getField('NumParticipants').get(project)
             # dict[''] = project.getField('').get(project)
             # dict[''] = project.getField('').get(project)
             # dict['DateCreated'] = project.getField('DateCreated').get(project)
@@ -537,33 +582,35 @@ class ProjectsExporter(object):
 
             # TODO:  Add service and sample typesz
 
-            dict['UID'] = project.UID()
-            try:
-                dict['Parent_UID'] = project.aq_parent.UID()
-            except:
-                dict['Parent_UID'] = ''
+            # dict['UID'] = project.UID()
+            # try:
+            #     dict['Parent_UID'] = project.aq_parent.UID()
+            # except:
+            #     dict['Parent_UID'] = ''
 
-            list_of_projects.append(dict)
+            # list_of_projects.append(dict)
 
-        return self.get_headings(), list_of_projects
 
-    def get_headings(self):
-        headings = [
-            'Title',
-            'Description',
-            'StudyType',
-            'EthicsFormLink',
-            'AgeHigh',
-            'AgeLow',
-            'NumParticipants',
-            # '',
-            # '',
-            # 'DateCreated',
-            'UID',
-            'Parent_UID',
-        ]
+        #return self.get_headings(), list_of_projects
+        return list_of_projects
 
-        return headings
+    # def get_headings(self):
+    #     headings = [
+    #         'Title',
+    #         'Description',
+    #         'StudyType',
+    #         'EthicsFormLink',
+    #         'AgeHigh',
+    #         'AgeLow',
+    #         'NumParticipants',
+    #         # '',
+    #         # '',
+    #         # 'DateCreated',
+    #         'UID',
+    #         'Parent_UID',
+    #     ]
+    #
+    #     return headings
 
 
 class SampleBatchesExporter(object):
@@ -579,7 +626,8 @@ class SampleBatchesExporter(object):
         if brains:
             sample_batches.append(['Title', 'Description', 'Project', 'Subject_ID', 'Parent_Biospecimen_Kit_ID',
                                    'Batch_ID', 'Batch_Type', 'Storage_Locations', 'Date_Created', 'Serum_Colour',
-                                   'Cfg_Time', 'Quantity', 'Last Modified By', 'Last Modify Date'])
+                                   'Cfg_Time', 'Quantity', 'Last_Modified_By', 'Last_Modified_Date', 'SampleBatch_ID',
+                                   'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             sample_batch = brain.getObject()
@@ -622,20 +670,18 @@ class SampleBatchesExporter(object):
                     row.append('')
                 row.append(sample_batch.getQuantity())
 
-                #project
-                project = sample_batch.getProject()
-                project_title = ''
-                if project:
-                    project_title = project.Title()
-                row.append(project_title)
-
                 last_modified_user = sample_batch.getField('ChangeUserName').get(sample_batch)
                 last_modified_date = ''
                 if sample_batch.getField('ChangeDateTime').get(sample_batch):
                     last_modified_date = sample_batch.getField('ChangeDateTime').get(sample_batch).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
-                #description
+
+                row.append(sample_batch.getId() if sample_batch.getId() else '')
+                row.append(sample_batch.UID())
+                row.append(sample_batch.aq_parent.UID() if sample_batch.aq_parent.UID() else '')
+                # row.append(sample_batch.absolute_url() if sample_batch.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
 
                 sample_batches.append(row)
         return sample_batches
@@ -654,7 +700,8 @@ class SamplesExporter(object):
         if brains:
             samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
                             'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                            'Date_Created', 'Last_Modified_By', 'Last_Modified_Date'])
+                            'Date_Created', 'SampleID_field', 'Last_Modified_By', 'Last_Modified_Date',
+                            'Sample_ID', 'UID', 'Parent_UID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
             if not sample.getField('LinkedSample').get(sample):
@@ -685,6 +732,7 @@ class SamplesExporter(object):
 
                 row.append(sample.getSampleState())
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
+                row.append(sample.getField('SampleID').get(sample))
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
@@ -693,7 +741,11 @@ class SamplesExporter(object):
                 row.append(last_modified_user)
                 row.append(last_modified_date)
 
-                # row.append(sample.getField('SampleID').get(sample))
+                row.append(sample.getId() if sample.getId() else '')
+                row.append(sample.UID())
+                row.append(sample.aq_parent.UID() if sample.aq_parent.UID() else '')
+                # row.append(sample.absolute_url() if sample.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
 
                 samples.append(row)
         return samples
@@ -712,8 +764,8 @@ class SamplesAliquotExporter(object):
         if brains:
             aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
                              'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
-                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'Sample_ID',
-                            'Last_Modified_By', 'Last_Modified_Date'])
+                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'SampleID_field',
+                             'Last_Modified_By', 'Last_Modified_Date', 'Aliquot_ID', 'UID', 'Parent_ID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
             parent_sample = sample.getField('LinkedSample').get(sample)
@@ -759,6 +811,12 @@ class SamplesAliquotExporter(object):
                 row.append(last_modified_user)
                 row.append(last_modified_date)
 
+                row.append(sample.getId() if sample.getId() else '')
+                row.append(sample.UID())
+                row.append(sample.aq_parent.UID() if sample.aq_parent.UID() else '')
+                # row.append(sample.absolute_url() if sample.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
+
                 aliquots.append(row)
         return aliquots
 
@@ -775,38 +833,45 @@ class BoxMovementExporter(object):
         brains = pc(portal_type="BoxMovement")
         if brains:
             box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved',
-                            'Last Modified By', 'Last Modify Date'])
+                                  'Last_Modified_By', 'Last_Modified_Date', 'BoxMovement_ID', 'UID', 'Parent_UID', 'URL_path'])
 
 
         for brain in brains:
             box_move = brain.getObject()
-            row = []
-            row.append(box_move.Title())
-            row.append(box_move.getField('description').get(box_move) if box_move.getField('description') else '')
-            old_storage = box_move.getField('StorageLocation').get(box_move)
-            if old_storage:
-                row.append(str(old_storage.getHierarchy()))
-            else:
-                row.append('')
-            row.append(box_move.getLabContact().Title())
-            new_location = box_move.getField('NewLocation').get(box_move)
-            if new_location:
-                row.append(str(new_location.getHierarchy()))
-            else:
-                row.append('')
-            if box_move.getDateCreated():
-                row.append(box_move.getDateCreated().strftime("%Y-%m-%d %H:%M"))
-            else:
-                row.append('')
+            if box_move:
+                row = []
+                row.append(box_move.Title())
+                row.append(box_move.getField('description').get(box_move) if box_move.getField('description') else '')
+                old_storage = box_move.getField('StorageLocation').get(box_move)
+                if old_storage:
+                    row.append(str(old_storage.getHierarchy()))
+                else:
+                    row.append('')
+                row.append(box_move.getLabContact().Title())
+                new_location = box_move.getField('NewLocation').get(box_move)
+                if new_location:
+                    row.append(str(new_location.getHierarchy()))
+                else:
+                    row.append('')
+                if box_move.getDateCreated():
+                    row.append(box_move.getDateCreated().strftime("%Y-%m-%d %H:%M"))
+                else:
+                    row.append('')
 
-            last_modified_user = box_move.getField('ChangeUserName').get(box_move)
-            last_modified_date = ''
-            if box_move.getField('ChangeDateTime').get(box_move):
-                last_modified_date = box_move.getField('ChangeDateTime').get(box_move).strftime("%Y-%m-%d %H:%M")
-            row.append(last_modified_user)
-            row.append(last_modified_date)
+                last_modified_user = box_move.getField('ChangeUserName').get(box_move)
+                last_modified_date = ''
+                if box_move.getField('ChangeDateTime').get(box_move):
+                    last_modified_date = box_move.getField('ChangeDateTime').get(box_move).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
 
-            box_movements.append(row)
+                row.append(box_move.getId() if box_move.getId() else '')
+                row.append(box_move.UID())
+                row.append(box_move.aq_parent.UID() if box_move.aq_parent.UID() else '')
+                # row.append(box_move.absolute_url() if box_move.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
+
+                box_movements.append(row)
         return box_movements
 
 
@@ -827,7 +892,7 @@ class SampleShipmentExporter(object):
                                      'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
                                      'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
                                      'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address',
-                                     'Last Modified By', 'Last Modify Date'])
+                                     'Last_Modified_By', 'Last_Modified_Date', 'SampleShipment_ID', 'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             shipment = brain.getObject()
@@ -851,7 +916,6 @@ class SampleShipmentExporter(object):
                 row.append(str(shipment.getField('Client').get(shipment).ClientID))
                 row.append(str(shipment.getField('ToEmailAddress').get(shipment)) if shipment.getField('ToEmailAddress') else '')
                 row.append(str(shipment.getField('FromEmailAddress').get(shipment)) if shipment.getField('FromEmailAddress') else '')
-                row.append(str([sample.id for sample in shipment.getField('SamplesList').get(shipment)]) if shipment.getField('SamplesList') else '')
 
                 last_modified_user = shipment.getField('ChangeUserName').get(shipment)
                 last_modified_date = ''
@@ -859,6 +923,12 @@ class SampleShipmentExporter(object):
                     last_modified_date = shipment.getField('ChangeDateTime').get(shipment).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
+
+                row.append(shipment.getId() if shipment.getId() else '')
+                row.append(shipment.UID())
+                row.append(shipment.aq_parent.UID() if shipment.aq_parent.UID() else '')
+                # row.append(shipment.absolute_url() if shipment.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
 
                 sample_shipments.append(row)
         return sample_shipments
