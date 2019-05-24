@@ -398,7 +398,8 @@ class SampleTypesExporter(object):
         # print('===brains========')
         if sample_type_brains:
             list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume',
-                                         'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path'])
+                                         'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path',
+                                         'Last_Modified_By', 'Last_Modified_Date'])
 
         for brain in sample_type_brains:
             sample_type = brain.getObject()
@@ -430,6 +431,14 @@ class SampleTypesExporter(object):
                 row.append(sample_type.aq_parent.UID() if sample_type.aq_parent.UID() else '')
                 # row.append(sample_type.absolute_url() if sample_type.absolute_url() else '')
                 row.append(brain.getPath() if brain.getPath() else '')
+
+                # last_modified_user = ''
+                last_modified_user = sample_type.getField('ChangeUserName').get(sample_type)
+                last_modified_date = ''
+                if sample_type.getField('ChangeDateTime').get(sample_type):
+                    last_modified_date = sample_type.getField('ChangeDateTime').get(sample_type).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
 
                 # list_of_sample_types.append(dict)
                 list_of_sample_types.append(row)
@@ -523,7 +532,8 @@ class ProjectsExporter(object):
         if project_brains:
             list_of_projects.append(['Title', 'Description', 'StudyType', 'EthicsFormLink', 'AgeHigh', 'AgeLow',
                                      'NumParticipants', 'Biospecimen_Types', 'Client', 'Client_ID',
-                                     'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path', 'Portal_URL'])
+                                     'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path',
+                                     'Portal_URL', 'Last_Modified_By', 'Last_Modified_Date'])
 
         portal_url = getToolByName(self.context, "portal_url").getPortalObject().absolute_url()
         for brain in project_brains:
@@ -563,6 +573,13 @@ class ProjectsExporter(object):
                 row.append(brain.getPath() if brain.getPath() else '')
                 row.append(portal_url)
 
+                last_modified_user = ''
+                # last_modified_user = project.getField('ChangeUserName').get(project)
+                last_modified_date = ''
+                # if project.getField('ChangeDateTime').get(project):
+                #     last_modified_date = project.getField('ChangeDateTime').get(project).strftime("%Y-%m-%d %H:%M")
+                row.append(last_modified_user)
+                row.append(last_modified_date)
                 # from plone import api
                 # print "api.portal.get().absolute_url(): " + api.portal.get().absolute_url()
 

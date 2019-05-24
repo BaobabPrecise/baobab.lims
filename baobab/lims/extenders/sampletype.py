@@ -4,7 +4,7 @@ from zope.component import adapts
 from Products.Archetypes.references import HoldingReference
 from Products.Archetypes.public import *
 
-from bika.lims.fields import ExtReferenceField, ExtBooleanField
+from bika.lims.fields import ExtReferenceField, ExtBooleanField, ExtStringField, ExtDateTimeField
 from bika.lims.interfaces import ISampleType
 from bika.lims.browser.widgets.referencewidget import ReferenceWidget as bika_ReferenceWidget
 from bika.lims.browser.widgets import SelectionWidget as BikaSelectionWidget
@@ -80,6 +80,22 @@ class SampleTypeSchemaExtender(object):
             widget=BooleanWidget(
                 label=_("Has Baby Number"),
                 description=_('Sample Type that has Baby No.'),
+            )
+        ),
+        ExtStringField(
+            'ChangeUserName',
+            widget=StringWidget(
+                label=_('ChangeUserName'),
+                description=_('The user who created or last made a change to this sample.'),
+                visible={'view': 'invisible', 'edit': 'invisible'}
+            )
+        ),
+        ExtDateTimeField(
+            'ChangeDateTime',
+            widget=StringWidget(
+                label=_('ChangeDateTime'),
+                description=_('The date and time when the sample was created or last updated.'),
+                visible={'view': 'invisible', 'edit': 'invisible'}
             )
         ),
     ]
