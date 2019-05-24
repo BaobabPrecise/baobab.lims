@@ -573,11 +573,10 @@ class ProjectsExporter(object):
                 row.append(brain.getPath() if brain.getPath() else '')
                 row.append(portal_url)
 
-                last_modified_user = ''
-                # last_modified_user = project.getField('ChangeUserName').get(project)
+                last_modified_user = project.getField('ChangeUserName').get(project)
                 last_modified_date = ''
-                # if project.getField('ChangeDateTime').get(project):
-                #     last_modified_date = project.getField('ChangeDateTime').get(project).strftime("%Y-%m-%d %H:%M")
+                if project.getField('ChangeDateTime').get(project):
+                    last_modified_date = project.getField('ChangeDateTime').get(project).strftime("%Y-%m-%d %H:%M")
                 row.append(last_modified_user)
                 row.append(last_modified_date)
                 # from plone import api
