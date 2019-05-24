@@ -108,4 +108,7 @@ class ExportView(IV):
         exporter = SampleTypesExporter(self.context)
         export_dict['Sample Types'] = exporter.export()
 
+        exporter = ProjectsExporter(self.context)
+        export_dict['Projects'] = exporter.export()
+
         self.excel_writer.write_output(export_dict)
