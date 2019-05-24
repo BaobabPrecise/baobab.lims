@@ -136,7 +136,7 @@ class EditView(BrowserView):
                 batch.getField('DateCreated').set(batch, DateTime())
 
             batch.processForm()
-            self.create_samples(batch, self.form, new_qty - old_qty)
+            self.create_samples(batch, self.form, new_qty - old_qty, member)
             batch.getField('BatchId').set(batch, batch.Title())
             batch.reindexObject()
 
@@ -185,7 +185,7 @@ class EditView(BrowserView):
 
         return bio_storages
 
-    def create_samples(self, context, form, num_samples):
+    def create_samples(self, context, form, num_samples, member=None):
         """Create samples from form
         """
 
@@ -210,6 +210,9 @@ class EditView(BrowserView):
             sample = samples_gen.create_sample(None, sample_type, context)
             sample.getField('SubjectID').set(sample, subject_id)
             sample.getField('SamplingDate').set(sample, parent_sampling_date)
+            if member:
+                sample.getField('ChangeUserName').set(sample, member)
+            sample.getField('ChangeDateTime').set(sample, DateTime())
             samples.append(sample)
 
         storages = self.get_biospecimen_storages()
