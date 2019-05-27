@@ -17,6 +17,30 @@
     />
 
     <subscriber
+        for="bika.lims.interfaces.ISampleType
+             Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler=".sampletype.ObjectInitializedEventHandler"
+    />
+
+    <subscriber
+        for="bika.lims.interfaces.ISampleType
+             Products.Archetypes.interfaces.IObjectEditedEvent"
+        handler=".sampletype.ObjectModifiedEventHandler"
+    />
+
+    <subscriber
+        for="baobab.lims.interfaces.IProject
+             Products.Archetypes.interfaces.IObjectInitializedEvent"
+        handler=".project.ObjectInitializedEventHandler"
+    />
+
+    <subscriber
+        for="baobab.lims.interfaces.IProject
+             Products.Archetypes.interfaces.IObjectEditedEvent"
+        handler=".project.ObjectModifiedEventHandler"
+    />
+
+    <subscriber
         for="baobab.lims.interfaces.IBatch
              Products.Archetypes.interfaces.IObjectInitializedEvent"
         handler=".batch.ObjectInitializedEventHandler"
