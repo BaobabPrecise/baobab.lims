@@ -7,6 +7,8 @@ from bika.lims.workflow import doActionFor
 from bika.lims.browser import BrowserView
 from baobab.lims import bikaMessageFactory as _
 from baobab.lims.interfaces import IProject
+from Products.CMFPlone.utils import _createObjectByType
+from bika.lims.utils import tmpID
 from plone.registry.interfaces import IRegistry
 from zope.component import queryUtility
 import datetime
@@ -116,8 +118,7 @@ class EditView(BrowserView):
         self.form = request.form
 
         if 'submitted' in request:
-            from Products.CMFPlone.utils import _createObjectByType
-            from bika.lims.utils import tmpID
+            audit_folder = self.context.auditlogs
 
             try:
                 self.validate_form_input()
@@ -125,6 +126,9 @@ class EditView(BrowserView):
                 self.form_error(e.message)
                 return
 
+            member = self.get_member()
+
+            bc = getToolByName(context, 'bika_catalog')
             pc = getToolByName(context, "portal_catalog")
             parent = context.aq_parent
 
@@ -133,8 +137,10 @@ class EditView(BrowserView):
             else:
                 folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
 
+            new_sample = False
             if not folder.hasObject(context.getId()):
                 sample = _createObjectByType('Sample', folder, tmpID())
+                new_sample = True
             else:
                 sample = context
 
@@ -143,23 +149,41 @@ class EditView(BrowserView):
             else:
                 sample.getField('Project').set(sample, request.form['Project_uid'])
 
+
             # sample.getField('AllowSharing').set(sample, request.form['AllowSharing'])
+            if not new_sample:
+                self.perform_reference_audit(sample, 'Kit', sample.getField('Kit').get(sample),
+                                         bc, request.form['Kit_uid'])
             sample.getField('Kit').set(sample, request.form['Kit_uid'])
+
+            if not new_sample:
+                self.perform_reference_audit(sample, 'StorageLocation', sample.getField('StorageLocation').get(sample),
+                                         pc, request.form['StorageLocation_uid'])
             sample.getField('StorageLocation').set(sample, request.form['StorageLocation_uid'])
+
+            if not new_sample and sample.getField('SubjectID').get(sample) != request.form['SubjectID']:
+                self.perform_simple_audit(sample, 'SubjectID', sample.getField('SubjectID').get(sample), request.form['SubjectID'])
             sample.getField('SubjectID').set(sample, request.form['SubjectID'])
+
+            if not new_sample and sample.getField('Barcode').get(sample) != request.form['Barcode']:
+                self.perform_simple_audit(sample, 'Barcode', sample.getField('Barcode').get(sample), request.form['Barcode'])
             sample.getField('Barcode').set(sample, request.form['Barcode'])
+
+            if not new_sample and sample.getField('Volume').get(sample) != request.form['Volume']:
+                self.perform_simple_audit(sample, 'Volume', sample.getField('Volume').get(sample), request.form['Volume'])
             sample.getField('Volume').set(sample, request.form['Volume'])
+
             if request.form.has_key('customUnit'):
                 request.form['Unit'] = request.form['customUnit']
 
+            if not new_sample and sample.getField('Unit').get(sample) != request.form['Unit']:
+                self.perform_simple_audit(sample, 'Unit', sample.getField('Unit').get(sample), request.form['Unit'])
             sample.getField('Unit').set(sample, request.form['Unit'])
-            sample.getField('LinkedSample').set(sample, request.form['LinkedSample_uid'])
 
-            membership = getToolByName(self.context, 'portal_membership')
-            if membership.isAnonymousUser():
-                member = 'anonymous'
-            else:
-                member = membership.getAuthenticatedMember().getUserName()
+            if not new_sample:
+                self.perform_reference_audit(sample, 'LinkedSample', sample.getField('LinkedSample').get(sample),
+                                         pc, request.form['LinkedSample_uid'])
+            sample.getField('LinkedSample').set(sample, request.form['LinkedSample_uid'])
 
             sample.getField('ChangeUserName').set(sample, member)
             sample.getField('ChangeDateTime').set(sample, DateTime())
@@ -183,12 +207,72 @@ class EditView(BrowserView):
             #registry.records.get('baobab.lims.biospecimen.units')._set_value(unit_tuple)
 
             sample.getField('Batch').set(sample, sample_batch)
-
             obj_url = sample.absolute_url_path()
+
+            if new_sample:
+                self.perform_simple_audit(sample, 'New')
+
             request.response.redirect(obj_url)
             return
 
         return self.template()
+
+    def get_member(self):
+        membership = getToolByName(self.context, 'portal_membership')
+        if membership.isAnonymousUser():
+            member = 'anonymous'
+        else:
+            member = membership.getAuthenticatedMember().getUserName()
+
+        return member
+
+    def perform_simple_audit(self, changed_item, changed_field='New', old_value=None, new_value=None):
+        audit_folder = self.context.auditlogs
+
+        audit_object = _createObjectByType('AuditLog', audit_folder, tmpID())
+        audit_object.edit(
+            title='%s_%s' % (DateTime(), self.get_member()),
+            AuditDate=DateTime(),
+            AuditUser=self.get_member(),
+            ContentType='Sample',
+            ItemTitle=changed_item.Title(),
+            ItemUID=changed_item.UID(),
+            ChangedValue=changed_field,
+            OldValue=old_value,
+            NewValue=new_value,
+        )
+        audit_object.reindexObject()
+
+    def perform_reference_audit(self, changed_item, changed_field, old_reference, catalog, new_uid):
+        audit_folder = self.context.auditlogs
+
+        new_title = ''
+        old_title = ''
+
+        if new_uid:
+            new_items_list = catalog(UID=new_uid)
+
+            if new_items_list:
+                new_item = new_items_list[0].getObject()
+                new_title = new_item.Title()
+
+        if old_reference:
+            old_title = old_reference.Title()
+
+        if old_title != new_title:
+
+            audit_object = _createObjectByType('AuditLog', audit_folder, tmpID())
+            audit_object.edit(
+                AuditDate=DateTime(),
+                AuditUser=self.get_member(),
+                ContentType='Sample',
+                ItemTitle=changed_item.Title(),
+                ItemUID=changed_item.UID(),
+                ChangedValue=changed_field,
+                OldValue=old_reference.Title(),
+                NewValue=new_title,
+            )
+            audit_object.reindexObject()
 
     def validate_form_input(self):
         subject_id = self.form.get('SubjectID')

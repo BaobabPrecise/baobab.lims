@@ -27,7 +27,8 @@ class BikaCustomGenerator:
                 'disease_ontologies',
                 'sampleshipments',
                 'boxmovements',
-                'managedstorage'):
+                'managedstorage',
+                'auditlogs',):
             try:
                 obj = portal._getOb(obj_id)
                 obj.unmarkCreationFlag()
@@ -97,6 +98,7 @@ class BikaCustomGenerator:
         at.setCatalogsByType('SampleShipment', ['bika_catalog'])
         at.setCatalogsByType('BoxMovement', ['bika_catalog', 'portal_catalog'])
         at.setCatalogsByType('ManagedStorage', ['bika_catalog', 'portal_catalog'])
+        at.setCatalogsByType('AuditLog', ['bika_catalog', 'portal_catalog'])
 
         addIndex(bc, 'getParentUID', 'FieldIndex')
         addIndex(bc, 'getProjectUID', 'FieldIndex')
@@ -316,5 +318,6 @@ def setupCustomVarious(context):
                           'analysisrequests',
                           'pricelists',
                           'invoices',
-                          'donors']):
+                          'donors',
+                          'auditlogs',]):
         portal.moveObjectsToTop([item])

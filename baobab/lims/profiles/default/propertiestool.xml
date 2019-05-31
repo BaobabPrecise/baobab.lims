@@ -29,6 +29,7 @@
         <element value="DiseaseOntology"/>
         <element value="SampleShipment"/>
         <element value="BoxMovement"/>
+        <element value="AuditLog"/>
   </property>
 
 </object>

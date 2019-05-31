@@ -57,6 +57,8 @@ def initialize(context):
     from controlpanel.bika_stockitems import StockItems
     from content.boxmovement import BoxMovement
     from content.boxmovements import BoxMovements
+    from content.auditlog import AuditLog
+    from content.auditlogs import AuditLogs
 
     content_types, constructors, ftis = process_types(
         listTypes(PROJECTNAME),

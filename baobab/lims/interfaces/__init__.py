@@ -213,3 +213,12 @@ class IBoxMovement(Interface):
 class IBoxMovements(Interface):
     """
     """
+
+class IAuditLog(Interface):
+    """
+    """
+
+
+class IAuditLogs(Interface):
+    """
+    """
