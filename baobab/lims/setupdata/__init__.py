@@ -10,6 +10,7 @@ from baobab.lims.idserver import renameAfterCreation
 from baobab.lims.interfaces import ISampleStorageLocation, IStockItemStorage
 from baobab.lims.browser.project import *
 from bika.lims import logger
+from baobab.lims.utils.audit_logger import AuditLogger
 
 
 def get_project_multi_items(context, string_elements, portal_type, portal_catalog):
@@ -362,16 +363,22 @@ class SampleImport(BaobabWorksheetImporter):
         self._wf = getToolByName(self.context, 'portal_workflow')
         self._errors = []
 
+        audit_logger = AuditLogger(self.context)
+
         rows = self.get_rows(3)
+        count = 0
         for row in rows:
             try:
                 self.create_biospecimen(row)
+                count += 1
             except ExcelSheetError as e:
                 self._errors.append(str(e))
                 continue
             except Exception as e:
                 self._errors.append(str(e))
                 continue
+
+        audit_logger.perform_simple_audit(None, '%s %s' % (self._item_type, str(count)))
 
     def get_storage_location(self, row_storage_location):
         storage_location = None
@@ -419,6 +426,8 @@ class SampleImport(BaobabWorksheetImporter):
 class ParentSample(SampleImport):
     """ Import biospecimens
     """
+
+    _item_type = 'Parent Sample'
 
     def create_biospecimen(self, row):
 
@@ -470,6 +479,7 @@ class ParentSample(SampleImport):
 class AliquotSample(SampleImport):
     """ Import biospecimens
     """
+    _item_type = 'Aliquot Sample'
 
     def create_biospecimen(self, row):
 

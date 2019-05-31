@@ -44,8 +44,8 @@ AuditUser = StringField(
     )
 )
 
-ContentType = StringField(
-    'ContentType',
+ItemType = StringField(
+    'ItemType',
     widget=StringWidget(
         label=_('Content Type'),
         description=_('The content type that was involved in this audit entry.'),
@@ -102,7 +102,7 @@ NewValue = StringField(
 schema = BikaSchema.copy() + Schema((
     AuditDate,
     AuditUser,
-    ContentType,
+    ItemType,
     ItemTitle,
     ItemUID,
     ChangedValue,

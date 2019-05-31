@@ -42,7 +42,7 @@ class AuditLogsView(BikaListingView):
             'Title': {
                 'title': _('Title'),
                 'index': 'sortable_title',
-                # 'input_width': '10',
+                'input_width': '10',
             },
             'AuditDate': {
                 'title': _('Audit Date'),
@@ -52,8 +52,8 @@ class AuditLogsView(BikaListingView):
                 'title': _('Audit User'),
                 'input_width': '30'
             },
-            'ContentType': {
-                'title': _('Content Type'),
+            'ItemType': {
+                'title': _('Item Type'),
                 'input_width': '30',
             },
             'ItemTitle': {
@@ -81,14 +81,14 @@ class AuditLogsView(BikaListingView):
                 'contentFilter': {
                     'inactive_state': 'active',
                     'sort_on': 'sortable_title',
-                    'sort_order': 'ascending'
+                    'sort_order': 'descending'
                 },
                 'transitions': [{'id': 'deactivate'}],
                 'columns': [
                     'Title',
                     'AuditDate',
                     'AuditUser',
-                    'ContentType',
+                    'ItemType',
                     'ItemTitle',
                     'ChangedValue',
                     'OldValue',
@@ -117,7 +117,7 @@ class AuditLogsView(BikaListingView):
             items[x]['Title'] = obj.Title()
             items[x]['AuditDate'] = obj.getField('AuditDate').get(obj)
             items[x]['AuditUser'] = obj.getField('AuditUser').get(obj)
-            items[x]['ContentType'] = obj.getField('ContentType').get(obj)
+            items[x]['ItemType'] = obj.getField('ItemType').get(obj)
             items[x]['ItemTitle'] = obj.getField('ItemTitle').get(obj)
             # items[x]['ItemUID'] = obj.getField('ItemUID').get(obj)
             items[x]['ChangedValue'] = obj.getField('ChangedValue').get(obj)
@@ -126,14 +126,3 @@ class AuditLogsView(BikaListingView):
             # items[x][''] = obj.getField('').get(obj)
 
         return items
-
-    # def getStringified(self, elements):
-    #     if not elements:
-    #         return ''
-    #
-    #     elements_list = []
-    #     for element in elements:
-    #         elements_list.append(element.title)
-    #
-    #     elements_string = ', '.join(map(str, elements_list))
-    #     return elements_string
