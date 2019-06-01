@@ -396,10 +396,10 @@ class SampleTypesExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         sample_type_brains = pc(portal_type="SampleType")
         # print('===brains========')
-        if sample_type_brains:
-            list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume',
-                                         'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path',
-                                         'Last_Modified_By', 'Last_Modified_Date'])
+        # if sample_type_brains:
+        list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume',
+                                     'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path',
+                                     'Last_Modified_By', 'Last_Modified_Date'])
 
         for brain in sample_type_brains:
             sample_type = brain.getObject()
@@ -529,11 +529,11 @@ class ProjectsExporter(object):
         pc = getToolByName(self.context, 'portal_catalog')
         project_brains = pc(portal_type="Project")
         # print('===brains========')
-        if project_brains:
-            list_of_projects.append(['Title', 'Description', 'StudyType', 'EthicsFormLink', 'AgeHigh', 'AgeLow',
-                                     'NumParticipants', 'Biospecimen_Types', 'Client', 'Client_ID',
-                                     'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path',
-                                     'Portal_URL', 'Last_Modified_By', 'Last_Modified_Date'])
+        # if project_brains:
+        list_of_projects.append(['Title', 'Description', 'StudyType', 'EthicsFormLink', 'AgeHigh', 'AgeLow',
+                                 'NumParticipants', 'Biospecimen_Types', 'Client', 'Client_ID',
+                                 'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path',
+                                 'Portal_URL', 'Last_Modified_By', 'Last_Modified_Date'])
 
         portal_url = getToolByName(self.context, "portal_url").getPortalObject().absolute_url()
         for brain in project_brains:
@@ -645,37 +645,37 @@ class ManagedStoragesExporter(object):
             sort_on='sortable_title',
             path={'query': path, 'level': 0})
 
-        if brains:
-            storages.append(['Title', 'Hierarchy', 'Number of all positions', 'Number of free positions',
-                             'Number of occupied positions', 'Occupied', 'review_state', 'Status', 'UID',
-                             'Last_Modified_By', 'Last_Modified_Date'])
+        # if brains:
+        storages.append(['Title', 'Hierarchy', 'Number of all positions', 'Number of free positions',
+                         'Number of occupied positions', 'Occupied', 'review_state', 'Status', 'UID',
+                         'Last_Modified_By', 'Last_Modified_Date'])
 
-            for brain in brains:
-                managed_storage = brain.getObject()
-                if managed_storage:
-                    row = []
-                    row.append(managed_storage.Title())
-                    row.append(str(managed_storage.getHierarchy()))
-                    total_pos_num = len(managed_storage.get_positions())
-                    row.append(total_pos_num)
-                    free_pos_num = len(managed_storage.get_free_positions())
-                    row.append(free_pos_num)
-                    row.append(str(total_pos_num - free_pos_num))
-                    if total_pos_num == free_pos_num:
-                        row.append("Empty")
-                    elif free_pos_num == 0:
-                        row.append("Full")
-                    else:
-                        row.append("Partial")
-                    reviewstate = workflow.getInfoFor(managed_storage, 'review_state')
-                    row.append(reviewstate)
-                    inactivestate = workflow.getInfoFor(managed_storage, 'inactive_state')
-                    row.append(inactivestate)
-                    row.append(managed_storage.UID())
-                    row.append('')
-                    row.append('')
+        for brain in brains:
+            managed_storage = brain.getObject()
+            if managed_storage:
+                row = []
+                row.append(managed_storage.Title())
+                row.append(str(managed_storage.getHierarchy()))
+                total_pos_num = len(managed_storage.get_positions())
+                row.append(total_pos_num)
+                free_pos_num = len(managed_storage.get_free_positions())
+                row.append(free_pos_num)
+                row.append(str(total_pos_num - free_pos_num))
+                if total_pos_num == free_pos_num:
+                    row.append("Empty")
+                elif free_pos_num == 0:
+                    row.append("Full")
+                else:
+                    row.append("Partial")
+                reviewstate = workflow.getInfoFor(managed_storage, 'review_state')
+                row.append(reviewstate)
+                inactivestate = workflow.getInfoFor(managed_storage, 'inactive_state')
+                row.append(inactivestate)
+                row.append(managed_storage.UID())
+                row.append('')
+                row.append('')
 
-                    storages.append(row)
+                storages.append(row)
 
         return storages
 
@@ -690,11 +690,11 @@ class SampleBatchesExporter(object):
         sample_batches = []
         bc = getToolByName(self.context, 'bika_catalog')
         brains = bc(portal_type="SampleBatch")
-        if brains:
-            sample_batches.append(['Title', 'Description', 'Project', 'Subject_ID', 'Parent_Biospecimen_Kit_ID',
-                                   'Batch_ID', 'Batch_Type', 'Storage_Locations', 'Date_Created', 'Serum_Colour',
-                                   'Cfg_Time', 'Quantity', 'Last_Modified_By', 'Last_Modified_Date', 'SampleBatch_ID',
-                                   'UID', 'Parent_UID', 'URL_path'])
+        # if brains:
+        sample_batches.append(['Title', 'Description', 'Project', 'Subject_ID', 'Parent_Biospecimen_Kit_ID',
+                               'Batch_ID', 'Batch_Type', 'Storage_Locations', 'Date_Created', 'Serum_Colour',
+                               'Cfg_Time', 'Quantity', 'Last_Modified_By', 'Last_Modified_Date', 'SampleBatch_ID',
+                               'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             sample_batch = brain.getObject()
@@ -764,11 +764,11 @@ class SamplesExporter(object):
         samples = []
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
-        if brains:
-            samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
-                            'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                            'Date_Created', 'SampleID_field', 'Last_Modified_By', 'Last_Modified_Date',
-                            'Sample_ID', 'UID', 'Parent_UID', 'URL_path'])
+        # if brains:
+        samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
+                        'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
+                        'Date_Created', 'SampleID_field', 'Last_Modified_By', 'Last_Modified_Date',
+                        'Sample_ID', 'UID', 'Parent_UID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
             if not sample.getField('LinkedSample').get(sample):
@@ -828,11 +828,11 @@ class SamplesAliquotExporter(object):
         aliquots = []
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="Sample")
-        if brains:
-            aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
-                             'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
-                             'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'SampleID_field',
-                             'Last_Modified_By', 'Last_Modified_Date', 'Aliquot_ID', 'UID', 'Parent_ID', 'URL_path'])
+        # if brains:
+        aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
+                         'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
+                         'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'SampleID_field',
+                         'Last_Modified_By', 'Last_Modified_Date', 'Aliquot_ID', 'UID', 'Parent_ID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
             parent_sample = sample.getField('LinkedSample').get(sample)
@@ -898,10 +898,9 @@ class BoxMovementExporter(object):
         box_movements = []
         pc = getToolByName(self.context, 'portal_catalog')
         brains = pc(portal_type="BoxMovement")
-        if brains:
-            box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved',
-                                  'Last_Modified_By', 'Last_Modified_Date', 'BoxMovement_ID', 'UID', 'Parent_UID', 'URL_path'])
-
+        # if brains:
+        box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved',
+                              'Last_Modified_By', 'Last_Modified_Date', 'BoxMovement_ID', 'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             box_move = brain.getObject()
@@ -954,12 +953,12 @@ class SampleShipmentExporter(object):
         pc = getToolByName(self.context, 'bika_catalog')
         brains = pc(portal_type="SampleShipment")
 
-        if brains:
-            sample_shipments.append(['Title', 'Description', 'Date_Delivered', 'Date_Dispatched',
-                                     'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
-                                     'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
-                                     'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address',
-                                     'Last_Modified_By', 'Last_Modified_Date', 'SampleShipment_ID', 'UID', 'Parent_UID', 'URL_path'])
+        # if brains:
+        sample_shipments.append(['Title', 'Description', 'Date_Delivered', 'Date_Dispatched',
+                                 'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
+                                 'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
+                                 'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address',
+                                 'Last_Modified_By', 'Last_Modified_Date', 'SampleShipment_ID', 'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             shipment = brain.getObject()
