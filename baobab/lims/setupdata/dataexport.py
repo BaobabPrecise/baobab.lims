@@ -84,6 +84,14 @@ class ExportView(IV):
     def export_data(self):
         export_dict = collections.OrderedDict()
 
+        # get the sample shipment
+        exporter = SampleShipmentExporter(self.context)
+        export_dict['Sample Shipment'] = exporter.export()
+
+        # get the box-movement
+        exporter = BoxMovementExporter(self.context)
+        export_dict['Box Movement'] = exporter.export()
+
         # get the batch samples
         exporter = SamplesExporter(self.context)
         export_dict['Parent Samples'] = exporter.export()
@@ -96,19 +104,16 @@ class ExportView(IV):
         exporter = SamplesAliquotExporter(self.context)
         export_dict['Aliquot'] = exporter.export()
 
-        # get the box-movement
-        exporter = BoxMovementExporter(self.context)
-        export_dict['Box Movement'] = exporter.export()
-
-        # get the sample shipment
-        exporter = SampleShipmentExporter(self.context)
-        export_dict['Sample Shipment'] = exporter.export()
-
         # get the sample types
         exporter = SampleTypesExporter(self.context)
         export_dict['Sample Types'] = exporter.export()
 
+        # get the projects
         exporter = ProjectsExporter(self.context)
         export_dict['Projects'] = exporter.export()
+
+        # get the managed storages
+        exporter = ManagedStoragesExporter(self.context)
+        export_dict['Managed Storages'] = exporter.export()
 
         self.excel_writer.write_output(export_dict)

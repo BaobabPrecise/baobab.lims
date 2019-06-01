@@ -629,6 +629,57 @@ class ProjectsExporter(object):
     #     return headings
 
 
+class ManagedStoragesExporter(object):
+    def __init__(self, context):
+        self.context = context
+
+    def export(self):
+        storages = []
+
+        pc = getToolByName(self.context, 'portal_catalog')
+        path = "/".join(self.context.getPhysicalPath())
+        workflow = getToolByName(self.context, 'portal_workflow')
+
+        brains = pc.searchResults(
+            portal_type='ManagedStorage',
+            sort_on='sortable_title',
+            path={'query': path, 'level': 0})
+
+        if brains:
+            storages.append(['Title', 'Hierarchy', 'Number of all positions', 'Number of free positions',
+                             'Number of occupied positions', 'Occupied', 'review_state', 'Status', 'UID',
+                             'Last_Modified_By', 'Last_Modified_Date'])
+
+            for brain in brains:
+                managed_storage = brain.getObject()
+                if managed_storage:
+                    row = []
+                    row.append(managed_storage.Title())
+                    row.append(str(managed_storage.getHierarchy()))
+                    total_pos_num = len(managed_storage.get_positions())
+                    row.append(total_pos_num)
+                    free_pos_num = len(managed_storage.get_free_positions())
+                    row.append(free_pos_num)
+                    row.append(str(total_pos_num - free_pos_num))
+                    if total_pos_num == free_pos_num:
+                        row.append("Empty")
+                    elif free_pos_num == 0:
+                        row.append("Full")
+                    else:
+                        row.append("Partial")
+                    reviewstate = workflow.getInfoFor(managed_storage, 'review_state')
+                    row.append(reviewstate)
+                    inactivestate = workflow.getInfoFor(managed_storage, 'inactive_state')
+                    row.append(inactivestate)
+                    row.append(managed_storage.UID())
+                    row.append('')
+                    row.append('')
+
+                    storages.append(row)
+
+        return storages
+
+
 class SampleBatchesExporter(object):
     """ This class packages all the samples info into a list of dictionaries and then returns it.
     """
