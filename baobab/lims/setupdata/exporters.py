@@ -394,11 +394,12 @@ class SampleTypesExporter(object):
         list_of_sample_types = []
 
         pc = getToolByName(self.context, 'portal_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         sample_type_brains = pc(portal_type="SampleType")
         # print('===brains========')
         # if sample_type_brains:
         list_of_sample_types.append(['Title', 'Description', 'Hazardous', 'Prefix', 'MinimumVolume',
-                                     'HasBabyNumber', 'SampleType_ID', 'UID', 'Parent_UID', 'URL_path',
+                                     'HasBabyNumber', 'SampleType_ID', 'Status', 'UID', 'Parent_UID', 'URL_path',
                                      'Last_Modified_By', 'Last_Modified_Date'])
 
         for brain in sample_type_brains:
@@ -427,6 +428,8 @@ class SampleTypesExporter(object):
                 row.append(sample_type.getField('MinimumVolume').get(sample_type))
                 row.append(sample_type.getField('HasBabyNumber').get(sample_type))
                 row.append(sample_type.getId() if sample_type.getId() else '')
+                inactivestate = workflow.getInfoFor(sample_type, "inactive_state")
+                row.append(inactivestate)
                 row.append(sample_type.UID())
                 row.append(sample_type.aq_parent.UID() if sample_type.aq_parent.UID() else '')
                 # row.append(sample_type.absolute_url() if sample_type.absolute_url() else '')
@@ -527,12 +530,13 @@ class ProjectsExporter(object):
         list_of_projects = []
 
         pc = getToolByName(self.context, 'portal_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         project_brains = pc(portal_type="Project")
         # print('===brains========')
         # if project_brains:
         list_of_projects.append(['Title', 'Description', 'StudyType', 'EthicsFormLink', 'AgeHigh', 'AgeLow',
                                  'NumParticipants', 'Biospecimen_Types', 'Client', 'Client_ID',
-                                 'Date_Created', 'Project_ID', 'UID', 'Parent_UID', 'URL_path',
+                                 'Date_Created', 'Project_ID', 'Status', 'UID', 'Parent_UID', 'URL_path',
                                  'Portal_URL', 'Last_Modified_By', 'Last_Modified_Date'])
 
         portal_url = getToolByName(self.context, "portal_url").getPortalObject().absolute_url()
@@ -566,6 +570,8 @@ class ProjectsExporter(object):
                 row.append(project.getField('DateCreated').get(project).strftime("%Y-%m-%d %H:%M") if project.getField('DateCreated').get(project) else '')
 
                 row.append(str(project.getId()))
+                inactivestate = workflow.getInfoFor(project, 'inactive_state')
+                row.append(inactivestate)
                 row.append(project.UID())
                 row.append(project.aq_parent.UID() if project.aq_parent.UID() else '')
                 # row.append(project.absolute_url() if project.absolute_url() else '')
@@ -689,11 +695,12 @@ class SampleBatchesExporter(object):
     def export(self):
         sample_batches = []
         bc = getToolByName(self.context, 'bika_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         brains = bc(portal_type="SampleBatch")
         # if brains:
         sample_batches.append(['Title', 'Description', 'Project', 'Subject_ID', 'Parent_Biospecimen_Kit_ID',
                                'Batch_ID', 'Batch_Type', 'Storage_Locations', 'Date_Created', 'Serum_Colour',
-                               'Cfg_Time', 'Quantity', 'Last_Modified_By', 'Last_Modified_Date', 'SampleBatch_ID',
+                               'Cfg_Time', 'Quantity', 'Status', 'Last_Modified_By', 'Last_Modified_Date', 'SampleBatch_ID',
                                'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
@@ -736,6 +743,8 @@ class SampleBatchesExporter(object):
                 else:
                     row.append('')
                 row.append(sample_batch.getQuantity())
+                inactivestate = workflow.getInfoFor(sample_batch, "inactive_state")
+                row.append(inactivestate)
 
                 last_modified_user = sample_batch.getField('ChangeUserName').get(sample_batch)
                 last_modified_date = ''
@@ -763,11 +772,12 @@ class SamplesExporter(object):
     def export(self):
         samples = []
         pc = getToolByName(self.context, 'portal_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         brains = pc(portal_type="Sample")
         # if brains:
         samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
                         'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                        'Date_Created', 'SampleID_field', 'Last_Modified_By', 'Last_Modified_Date',
+                        'Date_Created', 'SampleID_field', 'Status', 'Last_Modified_By', 'Last_Modified_Date',
                         'Sample_ID', 'UID', 'Parent_UID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
@@ -800,6 +810,8 @@ class SamplesExporter(object):
                 row.append(sample.getSampleState())
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
                 row.append(sample.getField('SampleID').get(sample))
+                cancellationstate = workflow.getInfoFor(sample, "cancellation_state")
+                row.append(cancellationstate)
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
@@ -827,11 +839,12 @@ class SamplesAliquotExporter(object):
     def export(self):
         aliquots = []
         pc = getToolByName(self.context, 'portal_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         brains = pc(portal_type="Sample")
         # if brains:
         aliquots.append(['Title', 'Sample_Type', 'Subject_ID', 'Barcode', 'Volume',
                          'Unit', 'Storage', 'Frozen_Time', 'Sample_State', 'Sampling_Time',
-                         'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'SampleID_field',
+                         'Parent_Biospecimen_Kit_ID', 'Batch_ID', 'Baby_No', 'Date_Created', 'SampleID_field', 'Status',
                          'Last_Modified_By', 'Last_Modified_Date', 'Aliquot_ID', 'UID', 'Parent_ID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
@@ -870,6 +883,8 @@ class SamplesAliquotExporter(object):
 
                 row.append(sample.getField('DateCreated').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('DateCreated').get(sample) else '')
                 row.append(sample.getField('SampleID').get(sample))
+                cancellationstate = workflow.getInfoFor(sample, "cancellation_state")
+                row.append(cancellationstate)
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
@@ -897,10 +912,12 @@ class BoxMovementExporter(object):
     def export(self):
         box_movements = []
         pc = getToolByName(self.context, 'portal_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         brains = pc(portal_type="BoxMovement")
         # if brains:
         box_movements.append(['Title', 'Description', 'Old_Location', 'Lab_Contact', 'New_Location', 'Date_Moved',
-                              'Last_Modified_By', 'Last_Modified_Date', 'BoxMovement_ID', 'UID', 'Parent_UID', 'URL_path'])
+                              'Last_Modified_By', 'Last_Modified_Date', 'BoxMovement_ID', 'Status',
+                              'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             box_move = brain.getObject()
@@ -932,6 +949,8 @@ class BoxMovementExporter(object):
                 row.append(last_modified_date)
 
                 row.append(box_move.getId() if box_move.getId() else '')
+                inactivestate = workflow.getInfoFor(box_move, "inactive_state")
+                row.append(inactivestate)
                 row.append(box_move.UID())
                 row.append(box_move.aq_parent.UID() if box_move.aq_parent.UID() else '')
                 # row.append(box_move.absolute_url() if box_move.absolute_url() else '')
@@ -951,6 +970,7 @@ class SampleShipmentExporter(object):
     def export(self):
         sample_shipments = []
         pc = getToolByName(self.context, 'bika_catalog')
+        workflow = getToolByName(self.context, 'portal_workflow')
         brains = pc(portal_type="SampleShipment")
 
         # if brains:
@@ -958,7 +978,8 @@ class SampleShipmentExporter(object):
                                  'Shipping_Date', 'Samples', 'Volume','Weight', 'Shipping_Cost', 'Shipping_Conditions',
                                  'Tracking_URL', 'Courier_Instructions', 'Courier', 'Billing_Address',
                                  'Delivery_Address', 'Client', 'Receiver_Email_Address', 'Sender_Email_Address',
-                                 'Last_Modified_By', 'Last_Modified_Date', 'SampleShipment_ID', 'UID', 'Parent_UID', 'URL_path'])
+                                 'Last_Modified_By', 'Last_Modified_Date', 'SampleShipment_ID', 'review_state', 'Status',
+                                 'UID', 'Parent_UID', 'URL_path'])
 
         for brain in brains:
             shipment = brain.getObject()
@@ -991,6 +1012,10 @@ class SampleShipmentExporter(object):
                 row.append(last_modified_date)
 
                 row.append(shipment.getId() if shipment.getId() else '')
+                reviewstate = workflow.getInfoFor(shipment, "review_state")
+                row.append(reviewstate)
+                inactivestate = workflow.getInfoFor(shipment, "inactive_state")
+                row.append(inactivestate)
                 row.append(shipment.UID())
                 row.append(shipment.aq_parent.UID() if shipment.aq_parent.UID() else '')
                 # row.append(shipment.absolute_url() if shipment.absolute_url() else '')
