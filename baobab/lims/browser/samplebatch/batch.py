@@ -13,6 +13,9 @@ from baobab.lims.browser.project import get_first_sampletype
 from baobab.lims.browser.biospecimens.biospecimens import BiospecimensView
 from baobab.lims import bikaMessageFactory as _
 
+from baobab.lims.utils.audit_logger import AuditLogger
+from baobab.lims.subscribers.utils import getLocalServerTime
+
 
 class BatchBiospecimensView(BiospecimensView):
     """ Biospecimens veiw from kit view.
@@ -114,11 +117,14 @@ class EditView(BrowserView):
             portal_factory = getToolByName(context, 'portal_factory')
 
             folder = context.aq_parent
-            batch = None
+            # batch = None
+            new_batch = False
             if not folder.hasObject(context.getId()):
                 batch = portal_factory.doCreate(context, context.id)
+                new_batch = True
             else:
                 batch = context
+                self.perform_batch_audit(batch, request)
 
             old_qty = int(batch.Quantity or 0)
             new_qty = int(self.form.get('Quantity', 0))
@@ -139,13 +145,71 @@ class EditView(BrowserView):
             self.create_samples(batch, self.form, new_qty - old_qty, member)
             batch.getField('BatchId').set(batch, batch.Title())
             batch.reindexObject()
-
             obj_url = batch.absolute_url_path()
+
+            if new_batch:
+                audit_logger = AuditLogger(self.context, 'Batch')
+                audit_logger.perform_simple_audit(batch, 'New')
+
             request.response.redirect(obj_url)
 
             return
 
         return self.template()
+
+    def perform_batch_audit(self, batch, request):
+        audit_logger = AuditLogger(self.context, 'Batch')
+        pc = getToolByName(self.context, "portal_catalog")
+
+        # if batch.getField('BatchId').get(batch) != request.form['BatchId']:
+        #     audit_logger.perform_simple_audit(batch, 'BatchId', batch.getField('BatchId').get(batch),
+        #                               request.form['BatchId'])
+
+        if batch.getField('BatchType').get(batch) != request.form['BatchType']:
+            audit_logger.perform_simple_audit(batch, 'BatchType', batch.getField('BatchType').get(batch),
+                                      request.form['BatchType'])
+
+        audit_logger.perform_reference_audit(batch, 'Project', batch.getField('Project').get(batch),
+                                     pc, request.form['Project_uid'])
+
+        if batch.getField('SubjectID').get(batch) != request.form['SubjectID']:
+            audit_logger.perform_simple_audit(batch, 'SubjectID', batch.getField('SubjectID').get(batch),
+                                      request.form['SubjectID'])
+
+        audit_logger.perform_reference_audit(batch, 'ParentBiospecimen', batch.getField('ParentBiospecimen').get(batch),
+                                             pc, request.form['ParentBiospecimen_uid'])
+
+        if str(batch.getField('Quantity').get(batch)) != request.form['Quantity']:
+            audit_logger.perform_simple_audit(batch, 'Quantity', batch.getField('Quantity').get(batch),
+                                      request.form['Quantity'])
+
+        audit_logger.perform_multi_reference_audit(batch, 'StorageLocation', batch.getField('StorageLocation').get(batch),
+                                             pc, request.form['StorageLocation_uid'])
+
+        date_created = request.form['DateCreated']
+        if date_created:
+            date_created = DateTime(getLocalServerTime(date_created))
+        if batch.getField('DateCreated').get(batch) != date_created:
+            audit_logger.perform_simple_audit(batch, 'DateCreated', batch.getField('DateCreated').get(batch),
+                                      date_created)
+
+        # if batch.getField('SerumColour').get(batch) != request.form['SerumColour']:
+        #     audit_logger.perform_simple_audit(batch, 'SerumColour', batch.getField('SerumColour').get(batch),
+        #                               request.form['SerumColour'])
+
+        form_cfg_date = request.form['CfgDateTime']
+        if form_cfg_date:
+            form_cfg_date = DateTime(getLocalServerTime(form_cfg_date))
+        else:
+            form_cfg_date = None
+        if batch.getField('CfgDateTime').get(batch) != form_cfg_date:
+            audit_logger.perform_simple_audit(batch, 'CfgDateTime', batch.getField('CfgDateTime').get(batch),
+                                      form_cfg_date)
+
+        # if batch.getField('').get(batch) != request.form['']:
+        #     audit_logger.perform_simple_audit(batch, '', batch.getField('').get(batch),
+        #                               request.form[''])
+
 
     def validate_form_input(self):
         subject_id = self.form.get('SubjectID')

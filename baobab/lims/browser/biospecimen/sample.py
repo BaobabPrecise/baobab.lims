@@ -13,6 +13,7 @@ from plone.registry.interfaces import IRegistry
 from zope.component import queryUtility
 import datetime
 from baobab.lims.utils.audit_logger import AuditLogger
+from baobab.lims.subscribers.utils import getLocalServerTime
 
 class UpdateBoxes(BrowserView):
     """
@@ -119,8 +120,9 @@ class EditView(BrowserView):
         self.form = request.form
 
         if 'submitted' in request:
-            audit_logger = AuditLogger(self.context)
-            audit_folder = self.context.auditlogs
+            # audit_folder = self.context.auditlogs
+            audit_logger = AuditLogger(self.context, 'Sample')
+
 
             try:
                 self.validate_form_input()
@@ -198,40 +200,55 @@ class EditView(BrowserView):
         return self.template()
 
     def perform_sample_audit(self, sample, request):
-        audit_logger = AuditLogger(self.context)
+        audit_logger = AuditLogger(self.context, 'Sample')
         bc = getToolByName(self.context, 'bika_catalog')
         pc = getToolByName(self.context, "portal_catalog")
 
         # sample_audit = {}
 
         audit_logger.perform_reference_audit(sample, 'Kit', sample.getField('Kit').get(sample),
-                                     bc, request.form['Kit_uid'])
+                                             bc, request.form['Kit_uid'])
         audit_logger.perform_reference_audit(sample, 'StorageLocation', sample.getField('StorageLocation').get(sample),
-                                     pc, request.form['StorageLocation_uid'])
+                                             pc, request.form['StorageLocation_uid'])
+
+        sampling_date = request.form['SamplingDate']
+        if sampling_date:
+            sampling_date = DateTime(getLocalServerTime(sampling_date))
+        else:
+            sampling_date = None
+        if sample.getField('SamplingDate').get(sample) != sampling_date:
+            audit_logger.perform_simple_audit(sample, 'SamplingDate', sample.getField('SamplingDate').get(sample),
+                                              sampling_date)
+
         if sample.getField('SubjectID').get(sample) != request.form['SubjectID']:
             audit_logger.perform_simple_audit(sample, 'SubjectID', sample.getField('SubjectID').get(sample),
-                                      request.form['SubjectID'])
+                                              request.form['SubjectID'])
         if sample.getField('Volume').get(sample) != request.form['Volume']:
             audit_logger.perform_simple_audit(sample, 'Volume', sample.getField('Volume').get(sample), request.form['Volume'])
 
         if sample.getField('Barcode').get(sample) != request.form['Barcode']:
             audit_logger.perform_simple_audit(sample, 'Barcode', sample.getField('Barcode').get(sample),
-                                      request.form['Barcode'])
+                                              request.form['Barcode'])
 
         if sample.getField('Unit').get(sample) != request.form['Unit']:
             audit_logger.perform_simple_audit(sample, 'Unit', sample.getField('Unit').get(sample), request.form['Unit'])
 
         audit_logger.perform_reference_audit(sample, 'LinkedSample', sample.getField('LinkedSample').get(sample),
-                                     pc, request.form['LinkedSample_uid'])
+                                             pc, request.form['LinkedSample_uid'])
 
         if not sample.getField('DateCreated').get(sample):
             audit_logger.perform_simple_audit(sample, 'DateCreated', sample.getField('DateCreated').get(sample), str(DateTime()))
 
         audit_logger.perform_reference_audit(sample, 'SampleType', sample.getField('SampleType').get(sample),
-                                     pc, request.form['SampleType_uid'])
+                                             pc, request.form['SampleType_uid'])
 
-        if sample.getField('FrozenTime').get(sample) != request.form['FrozenTime']:
-            audit_logger.perform_simple_audit(sample, 'FrozenTime', sample.getField('FrozenTime').get(sample), request.form['FrozenTime'])
+        frozen_time = request.form['FrozenTime']
+        if frozen_time:
+            frozen_time = DateTime(getLocalServerTime(frozen_time))
+        else:
+            frozen_time = None
+        if sample.getField('FrozenTime').get(sample) != frozen_time:
+            audit_logger.perform_simple_audit(sample, 'FrozenTime', sample.getField('FrozenTime').get(sample), frozen_time)
 
         if sample.getField('BabyNumber').get(sample) != request.form['BabyNumber']:
             audit_logger.perform_simple_audit(sample, 'BabyNumber', sample.getField('BabyNumber').get(sample), request.form['BabyNumber'])

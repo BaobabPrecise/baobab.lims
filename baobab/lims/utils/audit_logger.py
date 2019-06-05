@@ -8,8 +8,9 @@ from bika.lims.utils import tmpID
 
 class AuditLogger(object):
 
-    def __init__(self, context):
+    def __init__(self, context, item_type='Sample'):
         self.context = context
+        self._item_type = item_type
 
     def get_member(self):
         membership = getToolByName(self.context, 'portal_membership')
@@ -20,11 +21,11 @@ class AuditLogger(object):
 
         return member
 
-    def perform_simple_audit(self, changed_item=None, changed_field='New', old_value=None, new_value=None):
+    def perform_simple_audit(self,  changed_item=None, changed_field='New', old_value=None, new_value=None):
         audit_folder = self.context.auditlogs
 
         audit_object = _createObjectByType('AuditLog', audit_folder, tmpID())
-        item_title = 'Sample Import'
+        item_title = '%s Import' % self._item_type
         if changed_item:
             item_title = changed_item.Title()
 
@@ -36,7 +37,7 @@ class AuditLogger(object):
             title='%s_%s' % (DateTime(), self.get_member()),
             AuditDate=DateTime(),
             AuditUser=self.get_member(),
-            ItemType='Sample',
+            ItemType=self._item_type,
             ItemTitle=item_title,
             ItemUID=item_uid,
             ChangedValue=changed_field,
@@ -46,6 +47,7 @@ class AuditLogger(object):
         audit_object.reindexObject()
 
     def perform_reference_audit(self, changed_item, changed_field, old_reference, catalog, new_uid):
+
         audit_folder = self.context.auditlogs
 
         new_title = ''
@@ -68,11 +70,57 @@ class AuditLogger(object):
                 title='%s_%s' % (DateTime(), self.get_member()),
                 AuditDate=DateTime(),
                 AuditUser=self.get_member(),
-                ItemType='Sample',
+                ItemType=self._item_type,
                 ItemTitle=changed_item.Title(),
                 ItemUID=changed_item.UID(),
                 ChangedValue=changed_field,
-                OldValue=old_reference.Title(),
+                OldValue=old_title,
                 NewValue=new_title,
             )
             audit_object.reindexObject()
+
+    def perform_multi_reference_audit(self, changed_item, changed_field, old_references, catalog, new_uids):
+
+        audit_folder = self.context.auditlogs
+
+        new_titles = self.get_new_references(new_uids, catalog)
+        old_titles = self.get_old_references(old_references)
+
+        if set(old_titles) != set(new_titles):
+            print('old is not the same as new')
+            audit_object = _createObjectByType('AuditLog', audit_folder, tmpID())
+            audit_object.edit(
+                title='%s_%s' % (DateTime(), self.get_member()),
+                AuditDate=DateTime(),
+                AuditUser=self.get_member(),
+                ItemType=self._item_type,
+                ItemTitle=changed_item.Title(),
+                ItemUID=changed_item.UID(),
+                ChangedValue=changed_field,
+                OldValue=', '.join(old_titles),
+                NewValue=', '.join(new_titles),
+            )
+            audit_object.reindexObject()
+
+    def get_new_references(self, new_uids, catalog):
+        new_references_titles = []
+        split_uids = new_uids.split(',')
+
+        for uid in split_uids:
+            item_list = catalog(UID=uid)
+
+            if item_list:
+                new_references_titles.append(item_list[0].getObject().Title())
+
+        return new_references_titles
+
+    def get_old_references(self, old_references):
+        old_reference_titles = []
+
+        for reference in old_references:
+            old_reference_titles.append(reference.Title())
+
+        return old_reference_titles
+
+
+
