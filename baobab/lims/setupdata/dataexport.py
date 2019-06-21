@@ -111,4 +111,7 @@ class ExportView(IV):
         exporter = ProjectsExporter(self.context)
         export_dict['Projects'] = exporter.export()
 
+        exporter = AuditLogExporter(self.context)
+        export_dict['Audit Logs'] = exporter.export()
+
         self.excel_writer.write_output(export_dict)

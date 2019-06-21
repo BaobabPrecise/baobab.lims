@@ -321,6 +321,8 @@ class Projects(WorksheetImporter):
     def Import(self):
 
         pc = getToolByName(self.context, 'portal_catalog')
+        audit_logger = AuditLogger(self.context)
+        count = 0
 
         rows = self.get_rows(3)
         for row in rows:
@@ -350,6 +352,9 @@ class Projects(WorksheetImporter):
 
             obj.unmarkCreationFlag()
             renameAfterCreation(obj)
+            count += 1
+
+        audit_logger.perform_simple_audit(None, '%s %s' % ('Project', str(count)))
 
 
 class SampleImport(BaobabWorksheetImporter):
@@ -564,6 +569,8 @@ class SampleBatch(BaobabWorksheetImporter):
         self._errors = []
 
         self._pc = getToolByName(self.context, 'portal_catalog')
+        audit_logger = AuditLogger(self.context)
+        count = 0
 
         for row in rows:
             selected_project = row.get('Project', '')
@@ -619,6 +626,9 @@ class SampleBatch(BaobabWorksheetImporter):
             obj.reindexObject()
             obj.unmarkCreationFlag()
             renameAfterCreation(obj)
+            count += 1
+
+        audit_logger.perform_simple_audit(None, '%s %s' % ('SampleBatch', str(count)))
 
     def get_sample_type(self, row_sample_type):
         sampletype_list = self._pc(portal_type="SampleType", Title=row_sample_type)

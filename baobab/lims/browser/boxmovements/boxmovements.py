@@ -1,16 +1,21 @@
+from DateTime import DateTime
+
+from AccessControl import getSecurityManager
 from Products.CMFCore.utils import getToolByName
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
+from Products.ATContentTypes.lib import constraintypes
+from Products.CMFCore.permissions import AddPortalContent, ModifyPortalContent
 
 from plone.app.content.browser.interfaces import IFolderContentsView
 from plone.app.layout.globals.interfaces import IViewView
 from zope.interface.declarations import implements
-from AccessControl import getSecurityManager
-from Products.CMFCore.permissions import AddPortalContent, ModifyPortalContent
 
 from bika.lims.browser.bika_listing import BikaListingView
 from bika.lims.browser import BrowserView
 
 from baobab.lims import bikaMessageFactory as _
+from baobab.lims.utils.audit_logger import AuditLogger
+from baobab.lims.subscribers.utils import getLocalServerTime
 
 
 class BoxMovementsView(BikaListingView):
@@ -159,3 +164,83 @@ class BoxMovementView(BrowserView):
         self.new_location = context.getNewLocation().title
 
         return self.template()
+
+class BoxMovementEdit(BrowserView):
+    template = ViewPageTemplateFile('templates/boxmovement_edit.pt')
+
+    def __call__(self):
+        print('----box movement call---------')
+        portal = self.portal
+        request = self.request
+        context = self.context
+        setup = portal.bika_setup
+
+        if 'submitted' in request:
+
+            print('----box movement submitted---------')
+            # pdb.set_trace()
+            context.setConstrainTypesMode(constraintypes.DISABLED)
+            # This following line does the same as precedent which one is the
+            #  best?
+            # context.aq_parent.setConstrainTypesMode(constraintypes.DISABLED)
+
+            portal_factory = getToolByName(context, 'portal_factory')
+            context = portal_factory.doCreate(context, context.id)
+
+            # perform the audit for editting existing samples
+            # audit_logger = AuditLogger(self.context, 'BoxMovement')
+            self.perform_boxmovement_audit(context, request)
+
+            context.processForm()
+
+            print('---after the box movement process form')
+
+            obj_url = context.absolute_url_path()
+            request.response.redirect(obj_url)
+            return
+
+        print('-------the box movement template-------')
+
+        return self.template()
+
+    def perform_boxmovement_audit(self, boxmovement, request):
+
+        # print('--------------')
+        # print(boxmovement.getField('LabContact').get(boxmovement))
+        # print(boxmovement.getField('StorageLocation').get(boxmovement))
+        # print(boxmovement.getField('NewLocation').get(boxmovement))
+        # # print(type(boxmovement))
+        # print(boxmovement.__dict__)
+
+        audit_logger = AuditLogger(self.context, 'BoxMovement')
+        bc = getToolByName(self.context, 'bika_catalog')
+        pc = getToolByName(self.context, "portal_catalog")
+
+        audit_logger.perform_reference_audit(boxmovement, 'StorageLocation', boxmovement.getField('StorageLocation').get(boxmovement),
+                                             pc, request.form['StorageLocation_uid'])
+
+        date_created = request.form['DateCreated']
+        if date_created:
+            date_created = DateTime(getLocalServerTime(date_created))
+        else:
+            date_created = None
+        if boxmovement.getField('DateCreated').get(boxmovement) != date_created:
+            audit_logger.perform_simple_audit(boxmovement, 'DateCreated', boxmovement.getField('DateCreated').get(boxmovement), date_created)
+
+        audit_logger.perform_reference_audit(boxmovement, 'LabContact',
+                                             boxmovement.getField('LabContact').get(boxmovement),
+                                             pc, request.form['LabContact_uid'])
+
+        audit_logger.perform_reference_audit(boxmovement, 'NewLocation', boxmovement.getField('NewLocation').get(boxmovement),
+                                             pc, request.form['NewLocation_uid'])
+
+    def get_fields_with_visibility(self, visibility, mode=None):
+        mode = mode if mode else 'edit'
+        schema = self.context.Schema()
+        fields = []
+        for field in schema.fields():
+            isVisible = field.widget.isVisible
+            v = isVisible(self.context, mode, default='invisible', field=field)
+            if v == visibility:
+                fields.append(field)
+        return fields

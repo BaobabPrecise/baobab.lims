@@ -14,6 +14,14 @@
 
     <browser:page
       for="baobab.lims.interfaces.IProject"
+      name="base_edit"
+      class=".project.ProjectEdit"
+      permission="cmf.ModifyPortalContent"
+      layer="bika.lims.interfaces.IBikaLIMS"
+    />
+
+    <browser:page
+      for="baobab.lims.interfaces.IProject"
       name="kits"
       class=".project.ProjectKitsView"
       permission="zope2.View"

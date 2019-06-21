@@ -1063,3 +1063,104 @@ class AnalysisRequestsExporter(object):
         ]
 
         return headings
+
+class AuditLogExporter(object):
+    """ This class packages all the samples info into a list of dictionaries and then returns it.
+        Returns all the samples except Aliquots (Samples with Parent Samples/LinkedSample)
+    """
+    def __init__(self, context):
+        self.context = context
+
+    def export(self):
+        audit_logs = []
+        pc = getToolByName(self.context, 'portal_catalog')
+        brains = pc(portal_type="AuditLog")
+        if brains:
+            audit_logs.append(['Title', 'Description', 'Audit_Date', 'Audit_User', 'Audit_Type', 'Audit_Title',
+                            'Audit_UID', 'Changed_Value', 'Old_Value', 'New_Value', 'UID', 'Parent_UID', 'URL_path'])
+
+
+        for brain in brains:
+            audit_log = brain.getObject()
+            if audit_log:
+                row = []
+                row.append(audit_log.Title())
+                row.append(audit_log.getField('description').get(audit_log) if audit_log.getField('description') else '')
+
+                row.append(audit_log.getField('AuditDate').get(audit_log).strftime("%Y-%m-%d %H:%M") if audit_log.getField('AuditDate').get(audit_log) else '')
+                row.append(audit_log.getField('AuditUser').get(audit_log))
+                row.append(audit_log.getField('ItemType').get(audit_log))
+                row.append(audit_log.getField('ItemTitle').get(audit_log))
+                row.append(audit_log.getField('ItemUID').get(audit_log))
+                row.append(audit_log.getField('ChangedValue').get(audit_log))
+                row.append(audit_log.getField('OldValue').get(audit_log))
+                row.append(audit_log.getField('NewValue').get(audit_log))
+
+                # row.append(audit_log.getId() if box_move.getId() else '')
+                row.append(audit_log.UID())
+                row.append(audit_log.aq_parent.UID() if audit_log.aq_parent.UID() else '')
+                # row.append(box_move.absolute_url() if box_move.absolute_url() else '')
+                row.append(brain.getPath() if brain.getPath() else '')
+
+                audit_logs.append(row)
+        return audit_logs
+
+
+#
+#
+# class AuditLogsExporter(object):
+#     """ This class packages all the samples info into a list of dictionaries and then returns it.
+#     """
+#
+#     def __init__(self, context):
+#         self.context = context
+#
+#     def export(self):
+#         list_of_clients = []
+#
+#         pc = getToolByName(self.context, 'portal_catalog')
+#         audit_log_brains = pc(portal_type="AuditLog")
+#         # print('===brains========')
+#
+#         for brain in audit_log_brains:
+#             audit_log = brain.getObject()
+#             # print('-------------------')
+#             # print(sample.__dict__)
+#             dict = {}
+#             dict['Title'] = audit_log.Title()
+#             dict['Description'] = audit_log.Description()
+#
+#             dict['AuditDate'] = audit_log.getField('DateReceived').get(audit_log)
+#             dict['AuditUser'] = audit_log.getField('AuditUser').get(audit_log)
+#             dict['ItemType'] = audit_log.getField('ItemType').get(audit_log)
+#             dict['ItemTitle'] = audit_log.getField('ItemTitle').get(audit_log)
+#             dict['ItemUID'] = audit_log.getField('ItemUID').get(audit_log)
+#             dict['ChangedValue'] = audit_log.getField('ChangedValue').get(audit_log)
+#             dict['OldValue'] = audit_log.getField('OldValue').get(audit_log)
+#             dict['NewValue'] = audit_log.getField('NewValue').get(audit_log)
+#
+#             dict['UID'] = audit_log.UID()
+#             try:
+#                 dict['Parent_UID'] = audit_log.aq_parent.UID()
+#             except:
+#                 dict['Parent_UID'] = ''
+#
+#             list_of_clients.append(dict)
+#
+#         return self.get_headings(), list_of_clients
+#
+#     def get_headings(self):
+#         headings = [
+#             'Title',
+#             'Description',
+#             'EmailAddress',
+#             'Phone',
+#             'Fax',
+#             'ClientID',
+#             'BulkDiscount',
+#             'MemberDiscountApplies',
+#             'UID',
+#             'Parent_UID',
+#         ]
+#
+#         return headings

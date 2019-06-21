@@ -60,3 +60,67 @@ class SampleShipmentView(BrowserView):
                     "/++resource++baobab.lims.images/shipment_big.png"
 
         return self.template()
+
+class SampleShipmentEdit(BrowserView):
+    # template = ViewPageTemplateFile('templates/sample_shipment_edit.pt')
+    template = ViewPageTemplateFile('templates/sample_shipment_edit.pt')
+
+    def __call__(self):
+        # print('----SampleShipment call---------')
+        portal = self.portal
+        request = self.request
+        context = self.context
+        setup = portal.bika_setup
+
+        if 'submitted' in request:
+            # print('----SampleShipment submitted---------')
+            # pdb.set_trace()
+            context.setConstrainTypesMode(constraintypes.DISABLED)
+            # This following line does the same as precedent which one is the
+            #  best?
+
+            # context.aq_parent.setConstrainTypesMode(constraintypes.DISABLED)
+            portal_factory = getToolByName(context, 'portal_factory')
+            context = portal_factory.doCreate(context, context.id)
+            context.processForm()
+
+            # print('---after the SampleShipment process form')
+
+            obj_url = context.absolute_url_path()
+            request.response.redirect(obj_url)
+            return
+
+        # print('-------the SampleShipment template-------')
+
+        return self.template()
+
+    # def get_fields_with_visibility(self, visibility, mode=None):
+    #     mode = mode if mode else 'edit'
+    #     schema = self.context.Schema()
+    #     fields = []
+    #     for field in schema.fields():
+    #         # print('-------------')
+    #         isVisible = field.widget.isVisible
+    #         v = isVisible(self.context, mode, default='invisible', field=field)
+    #         if v == visibility:
+    #             fields.append(field)
+    #     return fields
+
+    def get_fields_with_visibility(self, visibility, mode=None):
+        mode = mode if mode else 'edit'
+        schema = self.context.Schema()
+        schemata = {}
+        # fields = []
+        for field in schema.fields():
+            isVisible = field.widget.isVisible
+            v = isVisible(self.context, mode, default='invisible', field=field)
+            if v == visibility:
+                if field.schemata in schemata:
+                    schemata[field.schemata].append(field)
+                # fields.append(field)
+                else:
+                    schemata[field.schemata] = [field]
+
+        print('--------')
+        print(schemata)
+        return schemata

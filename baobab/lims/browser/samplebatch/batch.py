@@ -193,9 +193,10 @@ class EditView(BrowserView):
             audit_logger.perform_simple_audit(batch, 'DateCreated', batch.getField('DateCreated').get(batch),
                                       date_created)
 
-        # if batch.getField('SerumColour').get(batch) != request.form['SerumColour']:
-        #     audit_logger.perform_simple_audit(batch, 'SerumColour', batch.getField('SerumColour').get(batch),
-        #                               request.form['SerumColour'])
+        if 'SerumColour' in request.form:
+            if batch.getField('SerumColour').get(batch) != request.form['SerumColour']:
+                audit_logger.perform_simple_audit(batch, 'SerumColour', batch.getField('SerumColour').get(batch),
+                                          request.form['SerumColour'])
 
         form_cfg_date = request.form['CfgDateTime']
         if form_cfg_date:
