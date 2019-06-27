@@ -1,3 +1,4 @@
+import sys
 import xlsxwriter
 import datetime
 import os
@@ -13,6 +14,8 @@ class ExcelWriter(object):
         self.context = context
 
     def create_workbook(self):
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
         filename = str(datetime.datetime.now().date()) + '_' + \
             str(datetime.datetime.now().time()).replace(':', '.')
 
@@ -33,6 +36,8 @@ class ExcelWriter(object):
         self.bold = self.workbook.add_format({'bold': True})
 
     def write_output(self, worksheet_data):
+        reload(sys)
+        sys.setdefaultencoding('utf-8')
         for sheet_name, sheet_data in worksheet_data.iteritems():
             work_sheet = self.workbook.add_worksheet(sheet_name)
             for i, row in enumerate(sheet_data):
@@ -42,3 +47,5 @@ class ExcelWriter(object):
                     work_sheet.write_row(i, 0, row)
 
         self.workbook.close()
+        reload(sys)
+        sys.setdefaultencoding('ascii')
