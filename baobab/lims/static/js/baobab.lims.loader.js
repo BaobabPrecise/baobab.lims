@@ -35,6 +35,8 @@ window.baobab.lims.controllers =  {
         ['BaobabBiospecimensView'],
     ".portaltype-samplebatch":
         ['BaobabBiospecimensView', 'BaobabSampleBatchEditView'],
+    "#baobab_sample_shipment_edit":
+        ['BaobabSampleShipmentEditView'],
     "#export-display-table":
         ['ExportTableView']
 };
@@ -93,5 +95,7 @@ window.baobab.lims.initialize = function() {
 $(document).ready(function(){
     // Initializes baobab.lims
     var length = window.baobab.lims.initialize();
+
+
 });
 }(jQuery));

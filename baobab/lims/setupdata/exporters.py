@@ -1074,7 +1074,7 @@ class AuditLogExporter(object):
     def export(self):
         audit_logs = []
         pc = getToolByName(self.context, 'portal_catalog')
-        brains = pc(portal_type="AuditLog")
+        brains = pc(portal_type="AuditLog", sort_on='sortable_title', sort_order='descending')
         if brains:
             audit_logs.append(['Title', 'Description', 'Audit_Date', 'Audit_User', 'Audit_Type', 'Audit_Title',
                             'Audit_UID', 'Changed_Value', 'Old_Value', 'New_Value', 'UID', 'Parent_UID', 'URL_path'])

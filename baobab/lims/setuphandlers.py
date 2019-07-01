@@ -153,6 +153,21 @@ class BikaCustomGenerator:
         mp(StoreInventoryOrder, ['Manager', 'LabManager', 'LabClerk'], 1)
 
         # projects
+        mp = portal.auditlogs.manage_permission
+
+        # Allow authenticated users to see the contents of the project folder
+        mp(permissions.View, ['Authenticated'], 0)
+        mp(permissions.AccessContentsInformation, ['Authenticated'], 0)
+        mp(permissions.ListFolderContents, ['Authenticated'], 0)
+
+        mp(permissions.ListFolderContents, ['Manager'], 1)
+        mp(permissions.View, ['Manager', 'LabManager', 'LabClerk', 'Analyst', 'Owner', 'EMS'], 0)
+        mp(permissions.ModifyPortalContent, ['Manager', 'LabManager', 'Owner'], 0)
+        mp('Access contents information', ['Manager', 'LabManager', 'LabClerk', 'Analyst', 'Owner', 'EMS'], 0)
+        mp(permissions.AddPortalContent, ['Manager', 'LabManager'], 0)
+        portal.projects.reindexObject()
+
+        # projects
         mp = portal.projects.manage_permission
 
         # Allow authenticated users to see the contents of the project folder
@@ -262,6 +277,7 @@ def setupCustomVarious(context):
               'referencesamples',
               'batches',
               'worksheets',
+              'auditlogs',
               'inventoryorders',
               'supplyorders',
               'arimports',

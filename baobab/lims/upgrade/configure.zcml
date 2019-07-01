@@ -65,4 +65,13 @@
         handler="baobab.lims.upgrade.to1540.upgrade"
         sortkey="7"
         profile="baobab.lims:default"/>
+
+    <genericsetup:upgradeStep
+        title="Sample shipment edit javascript"
+        description="Reload javascript for sample shipment edit"
+        source="1540"
+        destination="1550"
+        handler="baobab.lims.upgrade.to1550.upgrade"
+        sortkey="8"
+        profile="baobab.lims:default"/>
 </configure>

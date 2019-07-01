@@ -21,10 +21,12 @@ class AuditLogsView(BikaListingView):
         request.set('disable_plone.rightcolumn', 1)
         self.contentFilter = {
             'portal_type': 'AuditLog',
+            'sort_on': 'sortable_title',
+            'sort_order': 'reverse'
         }
-        self.context_actions = {_('Add'):
-                                    {'url': 'createObject?type_name=AuditLog',
-                                     'icon': '++resource++bika.lims.images/add.png'}}
+        # self.context_actions = {_('Add'):
+        #                             {'url': 'createObject?type_name=AuditLog',
+        #                              'icon': '++resource++bika.lims.images/add.png'}}
         self.title = self.context.translate(_("Audit Log"))
         self.icon = self.portal_url + \
                     "/++resource++baobab.lims.images/patient_big.png"
