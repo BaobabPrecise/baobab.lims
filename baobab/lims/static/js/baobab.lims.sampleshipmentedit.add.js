@@ -7,8 +7,8 @@ function BaobabSampleShipmentEditView() {
 
         $('#fieldsetlegend-default span').trigger("click")
 
-        // $('#fieldsetlegend-delivery-info').css('color', '#ccc')
-        // $('#fieldsetlegend-dates').css('background-color', '#ccc')
+        // $('#fieldsetlegend-delivery-info').css('background-color', '#ccc')
+        // $('#fieldsetlegend-default').css('background-color', '#ccc')
         // $('#fieldsetlegend-correspondence').css('background-color', '#ccc')
         // $('#fieldsetlegend-shipping-information').css('background-color', '#ccc')
 
@@ -32,7 +32,7 @@ function BaobabSampleShipmentEditView() {
             $('#fieldsetlegend-default').css('background-color', '#ccc')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ffffff')
             $('#fieldsetlegend-dates').css('background-color', '#ccc')
-            $('#correspondence').css('background-color', '#ccc')
+            $('#fieldsetlegend-correspondence').css('background-color', '#ccc')
             $('#fieldsetlegend-shipping-information').css('background-color', '#ccc')
 
             $('#fieldset-default').css('display', 'none');

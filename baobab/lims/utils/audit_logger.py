@@ -61,8 +61,6 @@ class AuditLogger(object):
                 new_title = new_item.Title()
 
         if old_reference:
-            # print('----------old reference')
-            # print(old_reference.__dict__)
             old_title = old_reference.Title()
 
         if old_title != new_title:
@@ -103,33 +101,12 @@ class AuditLogger(object):
             )
             audit_object.reindexObject()
 
-
-
-
-
-    # def get_old_references_list(self, old_references):
-    #     old_reference_titles = []
-    #
-    #     for reference in old_references:
-    #         old_reference_titles.append(reference.Title())
-    #
-    #     return old_reference_titles
-
     def perform_multi_reference_list_to_list_audit(self, changed_item, changed_field, old_references, catalog, new_uids):
 
         audit_folder = self.context.auditlogs
 
-        # print('------------audit project')
-        # print(old_references)
-        # print('-------')
-        # print(new_uids)
-
         new_titles = self.get_new_references_list(new_uids, catalog)
         old_titles = self.get_old_references_list(old_references, catalog)
-
-        # print('------compare titles')
-        # print(old_titles)
-        # print(new_titles)
 
         if set(old_titles) != set(new_titles):
             audit_object = _createObjectByType('AuditLog', audit_folder, tmpID())
@@ -146,20 +123,10 @@ class AuditLogger(object):
             )
             audit_object.reindexObject()
 
-    # def get_old_references(self, old_references):
-    #     old_reference_titles = []
-    #
-    #     for reference in old_references:
-    #         old_reference_titles.append(reference.Title())
-    #
-    #     return old_reference_titles
-
     def get_old_references_list(self, old_references, catalog):
         old_reference_titles = []
 
         for reference in old_references:
-
-            print(type(reference))
 
             items_list = []
             try:
@@ -176,9 +143,6 @@ class AuditLogger(object):
 
 
     def get_new_references_list(self, new_uids, catalog):
-
-        # print('-----inside get new reference list')
-        # print(new_uids)
 
         new_references_titles = []
 
@@ -202,16 +166,6 @@ class AuditLogger(object):
                 new_references_titles.append(item_list[0].getObject().Title())
 
         return new_references_titles
-
-
-
-    # def get_old_references_objects(self, old_references):
-    #     old_reference_titles = []
-    #
-    #     for reference in old_references:
-    #         old_reference_titles.append(reference.Title())
-    #
-    #     return old_reference_titles
 
 
 

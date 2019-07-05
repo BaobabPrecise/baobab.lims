@@ -83,7 +83,7 @@ class AuditLogsView(BikaListingView):
                 'contentFilter': {
                     'inactive_state': 'active',
                     'sort_on': 'sortable_title',
-                    'sort_order': 'descending'
+                    'sort_order': 'reverse'
                 },
                 'transitions': [{'id': 'deactivate'}],
                 'columns': [

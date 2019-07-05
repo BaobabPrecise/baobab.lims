@@ -69,10 +69,10 @@ class SampleShipmentEdit(BrowserView):
 
     def __call__(self):
         # print('----SampleShipment call---------')
-        portal = self.portal
+        # portal = self.portal
         request = self.request
         context = self.context
-        setup = portal.bika_setup
+        # setup = portal.bika_setup
 
         if 'submitted' in request:
             context.setConstrainTypesMode(constraintypes.DISABLED)
@@ -84,12 +84,9 @@ class SampleShipmentEdit(BrowserView):
 
             context.processForm()
 
-
             obj_url = context.absolute_url_path()
             request.response.redirect(obj_url)
             return
-
-        # print('-------the SampleShipment template-------')
 
         return self.template()
 
@@ -97,9 +94,9 @@ class SampleShipmentEdit(BrowserView):
         audit_logger = AuditLogger(self.context, 'SampleShipment')
         pc = getToolByName(self.context, "portal_catalog")
 
-        audit_logger.perform_multi_reference_list_to_list_audit(sample_shipment, 'SamplesList',
+        audit_logger.perform_multi_reference_audit(sample_shipment, 'SamplesList',
                                                                 sample_shipment.getField('SamplesList').get(sample_shipment),
-                                                                pc, request.form['SamplesList'])
+                                                                pc, request.form['SamplesList_uid'])
 
         if sample_shipment.getField('FromEmailAddress').get(sample_shipment) != request.form['FromEmailAddress']:
             audit_logger.perform_simple_audit(sample_shipment, 'FromEmailAddress', sample_shipment.getField('FromEmailAddress').get(sample_shipment),
@@ -120,6 +117,7 @@ class SampleShipmentEdit(BrowserView):
             audit_logger.perform_simple_audit(sample_shipment, 'BillingAddress', sample_shipment.getField('BillingAddress').get(sample_shipment),
                                               request.form['BillingAddress'])
 
+        # shipping date audit
         form_shipping_date = request.form['ShippingDate']
         if form_shipping_date:
             form_shipping_date = DateTime(getLocalServerTime(form_shipping_date))
@@ -129,6 +127,7 @@ class SampleShipmentEdit(BrowserView):
         if object_shipping_date != form_shipping_date:
             audit_logger.perform_simple_audit(sample_shipment, 'ShippingDate', object_shipping_date, form_shipping_date)
 
+        # date dispatched audit
         date_dispatched = request.form['DateDispatched']
         if date_dispatched:
             date_dispatched = DateTime(getLocalServerTime(date_dispatched))
@@ -139,6 +138,7 @@ class SampleShipmentEdit(BrowserView):
             audit_logger.perform_simple_audit(sample_shipment, 'DateDispatched',
                                               object_date_dispatched, date_dispatched)
 
+        # date delivered audit
         date_delivered = request.form['DateDelivered']
         if date_delivered:
             date_delivered = DateTime(getLocalServerTime(date_delivered))
@@ -161,14 +161,12 @@ class SampleShipmentEdit(BrowserView):
             audit_logger.perform_simple_audit(sample_shipment, 'TrackingURL', sample_shipment.getField('TrackingURL').get(sample_shipment),
                                               request.form['TrackingURL'])
 
+        # Shipment condition audit
         if sample_shipment.getField('ShipmentConditions').get(sample_shipment) != request.form['ShipmentConditions']:
             audit_logger.perform_simple_audit(sample_shipment, 'ShipmentConditions', sample_shipment.getField('ShipmentConditions').get(sample_shipment),
                                               request.form['ShipmentConditions'])
 
-        # if sample_shipment.getField('').get(sample_shipment) != request.form['']:
-        #     audit_logger.perform_simple_audit(sample_shipment, '', sample_shipment.getField('').get(sample_shipment),
-        #                                       request.form[''])
-
+        # Shipping costs audit
         form_shipping_cost = request.form['ShippingCost']
         if not form_shipping_cost:
             form_shipping_cost = 0
@@ -182,12 +180,14 @@ class SampleShipmentEdit(BrowserView):
             object_shipping_cost = float(object_shipping_cost)
 
         if form_shipping_cost != object_shipping_cost:
-            print('---shipping costs')
-            print(request.form['ShippingCost'])
-            print(sample_shipment.getField('ShippingCost').get(sample_shipment))
             audit_logger.perform_simple_audit(sample_shipment, 'ShippingCost', object_shipping_cost,
                                               form_shipping_cost)
 
+        if sample_shipment.getField('ShippingCost').get(sample_shipment) != request.form['ShippingCost']:
+            audit_logger.perform_simple_audit(sample_shipment, 'ShippingCost', sample_shipment.getField('ShippingCost').get(sample_shipment),
+                                              request.form['ShippingCost'])
+
+        # The weight audit
         form_weight = request.form['Weight']
         if not form_weight:
             form_weight = 0
@@ -199,48 +199,27 @@ class SampleShipmentEdit(BrowserView):
             object_weight = 0
         else:
             object_weight = float(object_weight)
+
         if object_weight != form_weight:
-            print('---the weight----')
-            print(request.form['Weight'])
-            print(sample_shipment.getField('Weight').get(sample_shipment))
-            audit_logger.perform_simple_audit(object_weight.get(sample_shipment),
-                                              form_weight)
+            audit_logger.perform_simple_audit(sample_shipment, 'Weight', object_weight, form_weight)
 
         if sample_shipment.getField('Volume').get(sample_shipment) != request.form['Volume']:
             audit_logger.perform_simple_audit(sample_shipment, 'Volume', sample_shipment.getField('Volume').get(sample_shipment),
                                               request.form['Volume'])
-
-        # if sample_shipment.getField('title').get(sample_shipment) != request.form['title']:
-        #     audit_logger.perform_simple_audit(sample_shipment, 'title', sample_shipment.getField('title').get(sample_shipment),
-        #                                       request.form['title'])
-        #
-        # if sample_shipment.getField('description').get(sample_shipment) != request.form['description']:
-        #     audit_logger.perform_simple_audit(sample_shipment, 'description', sample_shipment.getField('description').get(sample_shipment),
-        #                                       request.form['description'])
 
 
 
     def get_fields_with_visibility(self, visibility, schemata, mode=None):
         mode = mode if mode else 'edit'
         schema = self.context.Schema()
-        # schemata_list = []
         fields = []
         for field in schema.fields():
-
-
 
             isVisible = field.widget.isVisible
             v = isVisible(self.context, mode, default='invisible', field=field)
             if v == visibility:
 
-                # print(field.schemata)
-
                 if field.schemata == schemata:
-                    # schemata[field.schemata].append(field)
                     fields.append(field)
-                # else:
-                #     schemata[field.schemata] = [field]
-        #
-        # print('--------')
-        # print(schemata_list)
+
         return fields

@@ -56,19 +56,19 @@
 
             <ul class="formTabs">
                 <li class="formTab firstFormTab">
-                    <button id="fieldsetlegend-default" type="button"><span>Default</span></button>
+                    <button id="fieldsetlegend-default" type="button" style="background-color: #ffffff; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;"><span>Default</span></button>
                 </li>
                 <li class="formTab" class="selected">
-                    <button id="fieldsetlegend-delivery-info" type="button">Delivery info</button>
+                    <button id="fieldsetlegend-delivery-info" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Delivery info</button>
                 </li>
                 <li class="formTab">
-                    <button id="fieldsetlegend-dates" type="button">Dates</button>
+                    <button id="fieldsetlegend-dates" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Dates</button>
                 </li>
                 <li class="formTab">
-                    <button id="fieldsetlegend-correspondence" type="button">Correspondence</button>
+                    <button id="fieldsetlegend-correspondence" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Correspondence</button>
                 </li>
                 <li class="formTab lastFormTab">
-                    <button id="fieldsetlegend-shipping-information" type="button">Shipping information</button>
+                    <button id="fieldsetlegend-shipping-information" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Shipping information</button>
                 </li>
             </ul>
 
@@ -224,7 +224,7 @@
             </fieldset>
 
             <fieldset id="fieldset-correspondence" class="tabcontent" style="display: none">
-                <legend id="fieldsetlegend-correspondence">Correspondence</legend>
+                <!--?<legend id="fieldsetlegend-correspondence">Correspondence</legend>-->
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
@@ -272,7 +272,7 @@
             </fieldset>
 
             <fieldset id="fieldset-shipping-information" class="tabcontent" style="display: none">
-                <legend id="fieldsetlegend-shipping-information">Shipping information</legend>
+                <!--?<legend id="fieldsetlegend-shipping-information">Shipping information</legend>-->
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
@@ -333,14 +333,6 @@
     </div>
     </div>
     </div>
-
-    <script>
-function testFunction() {
-  console.debug('test this');
-  console.log('test log');
-  document.getElementById("demo").innerHTML = "Paragraph changed.";
-}
-</script>
 
 </body>
 </html>
