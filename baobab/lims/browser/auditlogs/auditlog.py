@@ -62,6 +62,10 @@ class AuditLogsView(BikaListingView):
                 'title': _('Item Title'),
                 'input_width': '30',
             },
+            'ItemUID': {
+                'title': _('Item UID'),
+                'input_width': '30',
+            },
             'ChangedValue': {
                 'title': _('Change'),
                 'input_width': '30',
@@ -92,6 +96,7 @@ class AuditLogsView(BikaListingView):
                     'AuditUser',
                     'ItemType',
                     'ItemTitle',
+                    'ItemUID',
                     'ChangedValue',
                     'OldValue',
                     'NewValue',
@@ -121,7 +126,7 @@ class AuditLogsView(BikaListingView):
             items[x]['AuditUser'] = obj.getField('AuditUser').get(obj)
             items[x]['ItemType'] = obj.getField('ItemType').get(obj)
             items[x]['ItemTitle'] = obj.getField('ItemTitle').get(obj)
-            # items[x]['ItemUID'] = obj.getField('ItemUID').get(obj)
+            items[x]['ItemUID'] = obj.getField('ItemUID').get(obj)
             items[x]['ChangedValue'] = obj.getField('ChangedValue').get(obj)
             items[x]['OldValue'] = obj.getField('OldValue').get(obj)
             items[x]['NewValue'] = obj.getField('NewValue').get(obj)

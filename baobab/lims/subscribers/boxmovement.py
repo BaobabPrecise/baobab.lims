@@ -11,12 +11,9 @@ def ObjectInitializedEventHandler(instance, event):
     """
     if instance.portal_type == 'BoxMovement':
         audit_logger = AuditLogger(instance, 'BoxMovement')
-        audit_logger.perform_simple_audit(instance, 'New')
-        # membership = getToolByName(instance, 'portal_membership')
-        # if membership.isAnonymousUser():
-        #     member = 'anonymous'
-        # else:
-        #     member = membership.getAuthenticatedMember().getUserName()
+        old_storage = instance.getField('StorageLocation').get(instance).getHierarchy()
+        new_storage = instance.getField('NewLocation').get(instance).getHierarchy()
+        audit_logger.perform_simple_audit(instance, 'New', old_storage, new_storage)
 
         member = audit_logger.get_member()
 

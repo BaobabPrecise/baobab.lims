@@ -169,15 +169,13 @@ class BoxMovementEdit(BrowserView):
     template = ViewPageTemplateFile('templates/boxmovement_edit.pt')
 
     def __call__(self):
-        print('----box movement call---------')
-        portal = self.portal
+        # portal = self.portal
         request = self.request
         context = self.context
-        setup = portal.bika_setup
+        # setup = portal.bika_setup
 
         if 'submitted' in request:
 
-            print('----box movement submitted---------')
             # pdb.set_trace()
             context.setConstrainTypesMode(constraintypes.DISABLED)
             # This following line does the same as precedent which one is the
@@ -187,30 +185,17 @@ class BoxMovementEdit(BrowserView):
             portal_factory = getToolByName(context, 'portal_factory')
             context = portal_factory.doCreate(context, context.id)
 
-            # perform the audit for editting existing samples
-            # audit_logger = AuditLogger(self.context, 'BoxMovement')
             self.perform_boxmovement_audit(context, request)
 
             context.processForm()
-
-            print('---after the box movement process form')
 
             obj_url = context.absolute_url_path()
             request.response.redirect(obj_url)
             return
 
-        print('-------the box movement template-------')
-
         return self.template()
 
     def perform_boxmovement_audit(self, boxmovement, request):
-
-        # print('--------------')
-        # print(boxmovement.getField('LabContact').get(boxmovement))
-        # print(boxmovement.getField('StorageLocation').get(boxmovement))
-        # print(boxmovement.getField('NewLocation').get(boxmovement))
-        # # print(type(boxmovement))
-        # print(boxmovement.__dict__)
 
         audit_logger = AuditLogger(self.context, 'BoxMovement')
         bc = getToolByName(self.context, 'bika_catalog')
