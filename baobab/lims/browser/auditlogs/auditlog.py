@@ -8,6 +8,7 @@ from Products.CMFCore.permissions import AddPortalContent, ModifyPortalContent
 from bika.lims.browser.bika_listing import BikaListingView
 
 from baobab.lims import bikaMessageFactory as _
+# from Products.CMFCore.utils import getToolByName
 
 
 class AuditLogsView(BikaListingView):
@@ -15,21 +16,20 @@ class AuditLogsView(BikaListingView):
 
     def __init__(self, context, request):
         BikaListingView.__init__(self, context, request)
-
-        self.context = context
-        self.catalog = 'bika_catalog'
-        request.set('disable_plone.rightcolumn', 1)
         self.contentFilter = {
             'portal_type': 'AuditLog',
             'sort_on': 'sortable_title',
             'sort_order': 'reverse'
         }
-        # self.context_actions = {_('Add'):
-        #                             {'url': 'createObject?type_name=AuditLog',
-        #                              'icon': '++resource++bika.lims.images/add.png'}}
+        self.context_actions = {}
         self.title = self.context.translate(_("Audit Log"))
         self.icon = self.portal_url + \
                     "/++resource++baobab.lims.images/patient_big.png"
+
+        self.context = context
+        self.catalog = 'portal_catalog'
+        request.set('disable_plone.rightcolumn', 1)
+
         self.description = ''
         self.show_sort_column = False
         self.show_select_row = False
@@ -87,7 +87,7 @@ class AuditLogsView(BikaListingView):
                 'contentFilter': {
                     'inactive_state': 'active',
                     'sort_on': 'sortable_title',
-                    'sort_order': 'reverse'
+                    # 'sort_order': 'reverse'
                 },
                 'transitions': [{'id': 'deactivate'}],
                 'columns': [
@@ -113,7 +113,13 @@ class AuditLogsView(BikaListingView):
 
     def folderitems(self, full_objects=False):
 
+        #
+        membership = getToolByName(self.context, 'portal_membership')
+        if membership.isAnonymousUser() or membership.getAuthenticatedMember().getUserName() != 'admin':
+            return []
+
         items = BikaListingView.folderitems(self)
+        reversed_items = []
 
         for x in range(len(items)):
 
@@ -131,5 +137,5 @@ class AuditLogsView(BikaListingView):
             items[x]['OldValue'] = obj.getField('OldValue').get(obj)
             items[x]['NewValue'] = obj.getField('NewValue').get(obj)
             # items[x][''] = obj.getField('').get(obj)
-
-        return items
+            reversed_items.insert(0, items[x])
+        return reversed_items

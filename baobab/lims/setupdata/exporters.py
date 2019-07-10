@@ -1091,10 +1091,10 @@ class AuditLogExporter(object):
                 row.append(audit_log.getField('AuditUser').get(audit_log))
                 row.append(audit_log.getField('ItemType').get(audit_log))
                 row.append(audit_log.getField('ItemTitle').get(audit_log))
-                row.append(audit_log.getField('ItemUID').get(audit_log))
+                row.append(str(audit_log.getField('ItemUID').get(audit_log)))
                 row.append(audit_log.getField('ChangedValue').get(audit_log))
-                row.append(audit_log.getField('OldValue').get(audit_log))
-                row.append(audit_log.getField('NewValue').get(audit_log))
+                row.append(str(audit_log.getField('OldValue').get(audit_log)))
+                row.append(str(audit_log.getField('NewValue').get(audit_log)))
 
                 # row.append(audit_log.getId() if box_move.getId() else '')
                 row.append(audit_log.UID())

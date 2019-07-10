@@ -3,6 +3,7 @@ import collections
 import os
 import json
 
+from Products.CMFCore.utils import getToolByName
 from Products.Five.browser.pagetemplatefile import ViewPageTemplateFile
 from plone.app.layout.globals.interfaces import IViewView
 from zope.interface import implements
@@ -111,7 +112,9 @@ class ExportView(IV):
         exporter = ProjectsExporter(self.context)
         export_dict['Projects'] = exporter.export()
 
-        exporter = AuditLogExporter(self.context)
-        export_dict['Audit Logs'] = exporter.export()
+        membership = getToolByName(self.context, 'portal_membership')
+        if not membership.isAnonymousUser() and membership.getAuthenticatedMember().getUserName() == 'admin':
+            exporter = AuditLogExporter(self.context)
+            export_dict['Audit Logs'] = exporter.export()
 
         self.excel_writer.write_output(export_dict)
