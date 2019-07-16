@@ -724,7 +724,7 @@ class SampleBatchesExporter(object):
                     parent_biospecimen_title = parent_biospecimen.Title()
                 row.append(parent_biospecimen_title)
                 row.append(str(sample_batch.getBatchId()))
-                row.append(sample_batch.getBatchType())
+                row.append(sample_batch.getBatchType() if sample_batch.getBatchType() else '')
 
                 if sample_batch.getStorageLocation():
                     locations = []
@@ -787,7 +787,7 @@ class SamplesExporter(object):
                 # project = sample.getField('Project').get(sample)
                 project = sample.aq_parent
                 row.append(project.Title())
-                row.append(sample.getSampleType().Title())
+                row.append(sample.getSampleType().Title() if sample.getSampleType() else '')
                 storage = sample.getField('StorageLocation').get(sample)
                 if storage:
                     row.append(storage.getHierarchy())
@@ -854,7 +854,7 @@ class SamplesAliquotExporter(object):
                 batch = sample.getField('Batch').get(sample) and sample.getField('Batch').get(sample).Title() or ''
                 row = []
                 row.append(sample.Title())
-                row.append(sample.getSampleType().Title())
+                row.append(sample.getSampleType().Title() if sample.getSampleType() else '')
                 row.append(sample.getField('SubjectID').get(sample))
                 row.append(sample.getField('Barcode').get(sample))
                 row.append(sample.getField('Volume').get(sample))
