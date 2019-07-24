@@ -160,7 +160,7 @@ class BikaCustomGenerator:
         mp(permissions.AccessContentsInformation, ['Authenticated'], 0)
         mp(permissions.ListFolderContents, ['Authenticated'], 0)
 
-        mp(permissions.ListFolderContents, ['Manager'], 1)
+        mp(permissions.ListFolderContents, ['Manager'], 0)
         mp(permissions.View, ['Manager', 'LabManager', 'LabClerk', 'Analyst', 'Owner', 'EMS'], 0)
         mp(permissions.ModifyPortalContent, ['Manager', 'LabManager', 'Owner'], 0)
         mp('Access contents information', ['Manager', 'LabManager', 'LabClerk', 'Analyst', 'Owner', 'EMS'], 0)
@@ -277,7 +277,6 @@ def setupCustomVarious(context):
               'referencesamples',
               'batches',
               'worksheets',
-              'auditlogs',
               'inventoryorders',
               'supplyorders',
               'arimports',
@@ -334,6 +333,5 @@ def setupCustomVarious(context):
                           'analysisrequests',
                           'pricelists',
                           'invoices',
-                          'donors',
-                          'auditlogs',]):
+                          'donors',]):
         portal.moveObjectsToTop([item])
