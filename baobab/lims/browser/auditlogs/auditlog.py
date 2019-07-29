@@ -115,7 +115,14 @@ class AuditLogsView(BikaListingView):
 
         #
         membership = getToolByName(self.context, 'portal_membership')
-        if membership.isAnonymousUser() or membership.getAuthenticatedMember().getUserName() != 'admin':
+        if membership.isAnonymousUser():
+            return []
+
+        member = membership.getAuthenticatedMember()
+        if member.getUserName() != 'admin' and 'LabManagers' not in member.getGroups():
+            # print('--------member')
+            # print(member.getUserName())
+            # print(member.getGroups())
             return []
 
         items = BikaListingView.folderitems(self)
