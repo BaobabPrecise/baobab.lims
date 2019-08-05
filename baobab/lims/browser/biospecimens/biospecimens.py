@@ -42,7 +42,7 @@ class BiospecimensView(BikaListingView):
         self.allow_edit = True
         self.content_type = content_type
         if self.content_type == 'batch':
-            self.pagesize = 1000
+            self.pagesize = 10000000
         else:
             self.pagesize = 50
 
