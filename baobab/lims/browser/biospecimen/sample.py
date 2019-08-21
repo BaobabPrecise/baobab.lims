@@ -126,12 +126,20 @@ class EditView(BrowserView):
                 return
 
             pc = getToolByName(context, "portal_catalog")
-            parent = context.aq_parent
 
-            if IProject.providedBy(parent):
-                folder = parent
-            else:
-                folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
+            folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
+
+            parent = context.aq_parent
+            #
+            # if IProject.providedBy(parent):
+            #     print('--------This is parent')
+            #     print(parent)
+            #     folder = parent
+            # else:
+            #
+            #     folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
+            #     print('--------This is from the form')
+            #     print(folder)
 
             if not folder.hasObject(context.getId()):
                 sample = _createObjectByType('Sample', folder, tmpID())

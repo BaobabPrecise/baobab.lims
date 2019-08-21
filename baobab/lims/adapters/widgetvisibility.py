@@ -53,10 +53,10 @@ class ARFieldWidgetVisibility(object):
                     'review_state': ['sample_received'],
                     'getProjectUID': self.context.aq_parent.UID()
                 }
-            elif fieldName == 'Client':
-                parent = self.context.aq_parent
-                if IProject.providedBy(parent):
-                    return 'hidden'
+            # elif fieldName == 'Client':
+            #     parent = self.context.aq_parent
+            #     if IProject.providedBy(parent):
+            #         return 'hidden'
         if fieldName in self.hidden_fields:
             field.required = False
             return 'invisible'
@@ -106,10 +106,10 @@ class SampleFieldWidgetVisibility(object):
             field.required = False
             return 'invisible'
 
-        if field_name == "Project":
-            parent = self.context.aq_parent
-            if IProject.providedBy(parent):
-                return 'hidden'
+        # if field_name == "Project":
+        #     parent = self.context.aq_parent
+        #     if IProject.providedBy(parent):
+        #         return 'hidden'
 
 
         if field_name in self.show_fields:
