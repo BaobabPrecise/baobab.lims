@@ -74,4 +74,14 @@
         handler="baobab.lims.upgrade.to1550.upgrade"
         sortkey="8"
         profile="baobab.lims:default"/>
+
+    <genericsetup:upgradeStep
+        title="Audit Log"
+        description="Implement the audit log"
+        source="1550"
+        destination="1560"
+        handler="baobab.lims.upgrade.to1560.upgrade"
+        sortkey="8"
+        profile="baobab.lims:default"/>
+
 </configure>

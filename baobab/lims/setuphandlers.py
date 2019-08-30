@@ -152,7 +152,7 @@ class BikaCustomGenerator:
         mp(ReceiveInventoryOrder, ['Manager', 'LabManager', 'LabClerk'], 1)
         mp(StoreInventoryOrder, ['Manager', 'LabManager', 'LabClerk'], 1)
 
-        # projects
+        # audit logger
         mp = portal.auditlogs.manage_permission
 
         # Allow authenticated users to see the contents of the project folder

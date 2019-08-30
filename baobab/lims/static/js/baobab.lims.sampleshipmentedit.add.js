@@ -3,7 +3,8 @@ function BaobabSampleShipmentEditView() {
     var that = this;
 
     that.load = function () {
-        $('#edit-bar').remove()
+        // console.log('This is the sample shipment.')
+        // $('#edit-bar').remove()
 
         $('#fieldsetlegend-default span').trigger("click")
 
@@ -13,7 +14,7 @@ function BaobabSampleShipmentEditView() {
         // $('#fieldsetlegend-shipping-information').css('background-color', '#ccc')
 
         $('#fieldsetlegend-default').click(function(){
-            console.log('test default');
+            // console.log('test default');
             $('#fieldsetlegend-default').css('background-color', '#ffffff')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ccc')
             $('#fieldsetlegend-dates').css('background-color', '#ccc')
@@ -28,7 +29,7 @@ function BaobabSampleShipmentEditView() {
         });
 
         $('#fieldsetlegend-delivery-info').click(function(){
-            console.log('test delivery info');
+            // console.log('test delivery info');
             $('#fieldsetlegend-default').css('background-color', '#ccc')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ffffff')
             $('#fieldsetlegend-dates').css('background-color', '#ccc')
@@ -43,7 +44,7 @@ function BaobabSampleShipmentEditView() {
         });
 
         $('#fieldsetlegend-dates').click(function(){
-            console.log('test dates');
+            // console.log('test dates');
             $('#fieldsetlegend-default').css('background-color', '#ccc')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ccc')
             $('#fieldsetlegend-dates').css('background-color', '#ffffff')
@@ -58,7 +59,7 @@ function BaobabSampleShipmentEditView() {
         });
 
         $('#fieldsetlegend-correspondence').click(function(){
-            console.log('test correspondence');
+            // console.log('test correspondence');
             $('#fieldsetlegend-default').css('background-color', '#ccc')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ccc')
             $('#fieldsetlegend-dates').css('background-color', '#ccc')
@@ -73,7 +74,7 @@ function BaobabSampleShipmentEditView() {
         });
 
         $('#fieldsetlegend-shipping-information').click(function(){
-            console.log('test shipping information');
+            // console.log('test shipping information');
             $('#fieldsetlegend-default').css('background-color', '#ccc')
             $('#fieldsetlegend-delivery-info').css('background-color', '#ccc')
             $('#fieldsetlegend-dates').css('background-color', '#ccc')

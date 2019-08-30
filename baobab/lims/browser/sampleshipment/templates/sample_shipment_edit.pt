@@ -34,6 +34,8 @@
 </head>
 
 <body>
+
+<div id="content" class="baobab_sample_shipment_edit">
 <metal:title fill-slot="content-title">
     <div>
         <h1>
@@ -48,31 +50,30 @@
         plone_view context/@@plone;
         portal_state context/@@plone_portal_state;">
 
-    <div id="baobab_sample_shipment_edit">
 
 
-         <div id="content">
 
 
-            <ul class="formTabs">
-                <li class="formTab firstFormTab">
-                    <button id="fieldsetlegend-default" type="button" style="background-color: #ffffff; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;"><span>Default</span></button>
-                </li>
-                <li class="formTab" class="selected">
-                    <button id="fieldsetlegend-delivery-info" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Delivery info</button>
-                </li>
-                <li class="formTab">
-                    <button id="fieldsetlegend-dates" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Dates</button>
-                </li>
-                <li class="formTab">
-                    <button id="fieldsetlegend-correspondence" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Correspondence</button>
-                </li>
-                <li class="formTab lastFormTab">
-                    <button id="fieldsetlegend-shipping-information" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Shipping information</button>
-                </li>
-            </ul>
 
-         <form id="sample_shipment_edit_form" name="sample_shipment_edit_info_form" method="POST">
+        <ul class="formTabs">
+            <li class="formTab firstFormTab">
+                <button id="fieldsetlegend-default" type="button" style="background-color: #ffffff; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;"><span>Default</span></button>
+            </li>
+            <li class="formTab" class="selected">
+                <button id="fieldsetlegend-delivery-info" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Delivery info</button>
+            </li>
+            <li class="formTab">
+                <button id="fieldsetlegend-dates" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Dates</button>
+            </li>
+            <li class="formTab">
+                <button id="fieldsetlegend-correspondence" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Correspondence</button>
+            </li>
+            <li class="formTab lastFormTab">
+                <button id="fieldsetlegend-shipping-information" type="button" style="background-color: #ccc; padding: 6px; border-radius: 7pt 7pt 0pt 0pt;">Shipping information</button>
+            </li>
+        </ul>
+
+        <form id="sample_shipment_edit_form" name="sample_shipment_edit_info_form" method="POST">
             <input type="hidden" name="submitted" value="1"/>
             <span tal:replace="structure context/@@authenticator/authenticator"/>
 
@@ -82,46 +83,46 @@
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
-                <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'default')">
-                    <tal:def tal:define="
-                        fieldName python:field.getName();
-                        field_macro here/widgets/field/macros/edit;
-                        accessor python:field.getAccessor(context);
-                        widget python:field.widget;
-                        errors python:{};
-                        mode string:edit;">
-                        <tr tal:attributes="fieldName fieldName">
-                            <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
-                                <td class="nowrap" tal:attributes="arnum arnum">
-                                    <div class="field">
-                                        <tal:ifLabel tal:condition="widget/render_own_label | nothing">
-                                            <label class="formQuestion"
-                                                   tal:attributes="for python:fieldName">
+                    <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'default')">
+                        <tal:def tal:define="
+                                fieldName python:field.getName();
+                                        field_macro here/widgets/field/macros/edit;
+                                                accessor python:field.getAccessor(context);
+                                                        widget python:field.widget;
+                                                                errors python:{};
+                                                                        mode string:edit;">
+                            <tr tal:attributes="fieldName fieldName">
+                                <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
+                                    <td class="nowrap" tal:attributes="arnum arnum">
+                                        <div class="field">
+                                            <tal:ifLabel tal:condition="widget/render_own_label | nothing">
+                                                <label class="formQuestion"
+                                                         tal:attributes="for python:fieldName">
                                                 <span tal:replace="python:widget.Label(here)"
-                                                      i18n:translate="" />
-                                                <span class="required"
-                                                      tal:condition="field/required"
-                                                      title="Required"
-                                                      i18n:attributes="title title_required;">&nbsp;</span>
-                                                <span class="formHelp"
-                                                     tal:define="description python:widget.Description(here)"
-                                                     tal:content="structure description"
-                                                     tal:attributes="id string:${fieldName}_help"
-                                                     i18n:translate="">
+                                                         i18n:translate="" />
+                                                    <span class="required"
+                                                             tal:condition="field/required"
+                                                          title="Required"
+                                                             i18n:attributes="title title_required;">&nbsp;</span>
+                                                    <span class="formHelp"
+                                                             tal:define="description python:widget.Description(here)"
+                                                             tal:content="structure description"
+                                                             tal:attributes="id string:${fieldName}_help"
+                                                             i18n:translate="">
                                                   Help
                                                 </span>
-                                            </label>
-                                        </tal:ifLabel>
-                                        <metal:field
-                                                use-macro="python:context.widget(fieldName, mode='edit')" />
-                                    </div>
+                                                </label>
+                                            </tal:ifLabel>
+                                            <metal:field
+                                                    use-macro="python:context.widget(fieldName, mode='edit')" />
+                                        </div>
 
-                                </td>
-                            </tal:columns>
-                        </tr>
-                    </tal:def>
-                </tal:field>
-                </thead>
+                                    </td>
+                                </tal:columns>
+                            </tr>
+                        </tal:def>
+                    </tal:field>
+                    </thead>
                 </table>
             </fieldset>
 
@@ -131,46 +132,46 @@
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
-                <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Delivery Info')">
-                    <tal:def tal:define="
-                        fieldName python:field.getName();
-                        field_macro here/widgets/field/macros/edit;
-                        accessor python:field.getAccessor(context);
-                        widget python:field.widget;
-                        errors python:{};
-                        mode string:edit;">
-                        <tr tal:attributes="fieldName fieldName">
-                            <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
-                                <td class="nowrap" tal:attributes="arnum arnum">
-                                    <div class="field">
-                                        <tal:ifLabel tal:condition="widget/render_own_label | nothing">
-                                            <label class="formQuestion"
-                                                   tal:attributes="for python:fieldName">
+                    <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Delivery Info')">
+                        <tal:def tal:define="
+                                fieldName python:field.getName();
+                                        field_macro here/widgets/field/macros/edit;
+                                                accessor python:field.getAccessor(context);
+                                                        widget python:field.widget;
+                                                                errors python:{};
+                                                                        mode string:edit;">
+                            <tr tal:attributes="fieldName fieldName">
+                                <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
+                                    <td class="nowrap" tal:attributes="arnum arnum">
+                                        <div class="field">
+                                            <tal:ifLabel tal:condition="widget/render_own_label | nothing">
+                                                <label class="formQuestion"
+                                                         tal:attributes="for python:fieldName">
                                                 <span tal:replace="python:widget.Label(here)"
-                                                      i18n:translate="" />
-                                                <span class="required"
-                                                      tal:condition="field/required"
-                                                      title="Required"
-                                                      i18n:attributes="title title_required;">&nbsp;</span>
-                                                <span class="formHelp"
-                                                     tal:define="description python:widget.Description(here)"
-                                                     tal:content="structure description"
-                                                     tal:attributes="id string:${fieldName}_help"
-                                                     i18n:translate="">
+                                                         i18n:translate="" />
+                                                    <span class="required"
+                                                             tal:condition="field/required"
+                                                          title="Required"
+                                                             i18n:attributes="title title_required;">&nbsp;</span>
+                                                    <span class="formHelp"
+                                                             tal:define="description python:widget.Description(here)"
+                                                             tal:content="structure description"
+                                                             tal:attributes="id string:${fieldName}_help"
+                                                             i18n:translate="">
                                                   Help
                                                 </span>
-                                            </label>
-                                        </tal:ifLabel>
-                                        <metal:field
-                                                use-macro="python:context.widget(fieldName, mode='edit')" />
-                                    </div>
+                                                </label>
+                                            </tal:ifLabel>
+                                            <metal:field
+                                                    use-macro="python:context.widget(fieldName, mode='edit')" />
+                                        </div>
 
-                                </td>
-                            </tal:columns>
-                        </tr>
-                    </tal:def>
-                </tal:field>
-                </thead>
+                                    </td>
+                                </tal:columns>
+                            </tr>
+                        </tal:def>
+                    </tal:field>
+                    </thead>
                 </table>
             </fieldset>
 
@@ -180,46 +181,46 @@
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
-                <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Dates')">
-                    <tal:def tal:define="
-                        fieldName python:field.getName();
-                        field_macro here/widgets/field/macros/edit;
-                        accessor python:field.getAccessor(context);
-                        widget python:field.widget;
-                        errors python:{};
-                        mode string:edit;">
-                        <tr tal:attributes="fieldName fieldName">
-                            <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
-                                <td class="nowrap" tal:attributes="arnum arnum">
-                                    <div class="field">
-                                        <tal:ifLabel tal:condition="widget/render_own_label | nothing">
-                                            <label class="formQuestion"
-                                                   tal:attributes="for python:fieldName">
+                    <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Dates')">
+                        <tal:def tal:define="
+                                fieldName python:field.getName();
+                                        field_macro here/widgets/field/macros/edit;
+                                                accessor python:field.getAccessor(context);
+                                                        widget python:field.widget;
+                                                                errors python:{};
+                                                                        mode string:edit;">
+                            <tr tal:attributes="fieldName fieldName">
+                                <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
+                                    <td class="nowrap" tal:attributes="arnum arnum">
+                                        <div class="field">
+                                            <tal:ifLabel tal:condition="widget/render_own_label | nothing">
+                                                <label class="formQuestion"
+                                                         tal:attributes="for python:fieldName">
                                                 <span tal:replace="python:widget.Label(here)"
-                                                      i18n:translate="" />
-                                                <span class="required"
-                                                      tal:condition="field/required"
-                                                      title="Required"
-                                                      i18n:attributes="title title_required;">&nbsp;</span>
-                                                <span class="formHelp"
-                                                     tal:define="description python:widget.Description(here)"
-                                                     tal:content="structure description"
-                                                     tal:attributes="id string:${fieldName}_help"
-                                                     i18n:translate="">
+                                                         i18n:translate="" />
+                                                    <span class="required"
+                                                             tal:condition="field/required"
+                                                          title="Required"
+                                                             i18n:attributes="title title_required;">&nbsp;</span>
+                                                    <span class="formHelp"
+                                                             tal:define="description python:widget.Description(here)"
+                                                             tal:content="structure description"
+                                                             tal:attributes="id string:${fieldName}_help"
+                                                             i18n:translate="">
                                                   Help
                                                 </span>
-                                            </label>
-                                        </tal:ifLabel>
-                                        <metal:field
-                                                use-macro="python:context.widget(fieldName, mode='edit')" />
-                                    </div>
+                                                </label>
+                                            </tal:ifLabel>
+                                            <metal:field
+                                                    use-macro="python:context.widget(fieldName, mode='edit')" />
+                                        </div>
 
-                                </td>
-                            </tal:columns>
-                        </tr>
-                    </tal:def>
-                </tal:field>
-                </thead>
+                                    </td>
+                                </tal:columns>
+                            </tr>
+                        </tal:def>
+                    </tal:field>
+                    </thead>
                 </table>
             </fieldset>
 
@@ -228,46 +229,46 @@
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
-                <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Correspondence')">
-                    <tal:def tal:define="
-                        fieldName python:field.getName();
-                        field_macro here/widgets/field/macros/edit;
-                        accessor python:field.getAccessor(context);
-                        widget python:field.widget;
-                        errors python:{};
-                        mode string:edit;">
-                        <tr tal:attributes="fieldName fieldName">
-                            <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
-                                <td class="nowrap" tal:attributes="arnum arnum">
-                                    <div class="field">
-                                        <tal:ifLabel tal:condition="widget/render_own_label | nothing">
-                                            <label class="formQuestion"
-                                                   tal:attributes="for python:fieldName">
+                    <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Correspondence')">
+                        <tal:def tal:define="
+                                fieldName python:field.getName();
+                                        field_macro here/widgets/field/macros/edit;
+                                                accessor python:field.getAccessor(context);
+                                                        widget python:field.widget;
+                                                                errors python:{};
+                                                                        mode string:edit;">
+                            <tr tal:attributes="fieldName fieldName">
+                                <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
+                                    <td class="nowrap" tal:attributes="arnum arnum">
+                                        <div class="field">
+                                            <tal:ifLabel tal:condition="widget/render_own_label | nothing">
+                                                <label class="formQuestion"
+                                                         tal:attributes="for python:fieldName">
                                                 <span tal:replace="python:widget.Label(here)"
-                                                      i18n:translate="" />
-                                                <span class="required"
-                                                      tal:condition="field/required"
-                                                      title="Required"
-                                                      i18n:attributes="title title_required;">&nbsp;</span>
-                                                <span class="formHelp"
-                                                     tal:define="description python:widget.Description(here)"
-                                                     tal:content="structure description"
-                                                     tal:attributes="id string:${fieldName}_help"
-                                                     i18n:translate="">
+                                                         i18n:translate="" />
+                                                    <span class="required"
+                                                             tal:condition="field/required"
+                                                          title="Required"
+                                                             i18n:attributes="title title_required;">&nbsp;</span>
+                                                    <span class="formHelp"
+                                                             tal:define="description python:widget.Description(here)"
+                                                             tal:content="structure description"
+                                                             tal:attributes="id string:${fieldName}_help"
+                                                             i18n:translate="">
                                                   Help
                                                 </span>
-                                            </label>
-                                        </tal:ifLabel>
-                                        <metal:field
-                                                use-macro="python:context.widget(fieldName, mode='edit')" />
-                                    </div>
+                                                </label>
+                                            </tal:ifLabel>
+                                            <metal:field
+                                                    use-macro="python:context.widget(fieldName, mode='edit')" />
+                                        </div>
 
-                                </td>
-                            </tal:columns>
-                        </tr>
-                    </tal:def>
-                </tal:field>
-                </thead>
+                                    </td>
+                                </tal:columns>
+                            </tr>
+                        </tal:def>
+                    </tal:field>
+                    </thead>
                 </table>
             </fieldset>
 
@@ -276,50 +277,50 @@
                 <table summary="Project info" class="listing add nosort" cellpadding="0" cellspacing="0" style="width: 100%">
                     <thead>
 
-                <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Shipping Information')">
-                    <tal:def tal:define="
-                        fieldName python:field.getName();
-                        field_macro here/widgets/field/macros/edit;
-                        accessor python:field.getAccessor(context);
-                        widget python:field.widget;
-                        errors python:{};
-                        mode string:edit;">
-                        <tr tal:attributes="fieldName fieldName">
-                            <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
-                                <td class="nowrap" tal:attributes="arnum arnum">
-                                    <div class="field">
-                                        <tal:ifLabel tal:condition="widget/render_own_label | nothing">
-                                            <label class="formQuestion"
-                                                   tal:attributes="for python:fieldName">
+                    <tal:field tal:repeat="field python:view.get_fields_with_visibility('visible', 'Shipping Information')">
+                        <tal:def tal:define="
+                                fieldName python:field.getName();
+                                        field_macro here/widgets/field/macros/edit;
+                                                accessor python:field.getAccessor(context);
+                                                        widget python:field.widget;
+                                                                errors python:{};
+                                                                        mode string:edit;">
+                            <tr tal:attributes="fieldName fieldName">
+                                <tal:columns tal:condition="python: fieldName != 'Remarks'" tal:repeat="arnum python:range(1)">
+                                    <td class="nowrap" tal:attributes="arnum arnum">
+                                        <div class="field">
+                                            <tal:ifLabel tal:condition="widget/render_own_label | nothing">
+                                                <label class="formQuestion"
+                                                         tal:attributes="for python:fieldName">
                                                 <span tal:replace="python:widget.Label(here)"
-                                                      i18n:translate="" />
-                                                <span class="required"
-                                                      tal:condition="field/required"
-                                                      title="Required"
-                                                      i18n:attributes="title title_required;">&nbsp;</span>
-                                                <span class="formHelp"
-                                                     tal:define="description python:widget.Description(here)"
-                                                     tal:content="structure description"
-                                                     tal:attributes="id string:${fieldName}_help"
-                                                     i18n:translate="">
+                                                         i18n:translate="" />
+                                                    <span class="required"
+                                                             tal:condition="field/required"
+                                                          title="Required"
+                                                             i18n:attributes="title title_required;">&nbsp;</span>
+                                                    <span class="formHelp"
+                                                             tal:define="description python:widget.Description(here)"
+                                                             tal:content="structure description"
+                                                             tal:attributes="id string:${fieldName}_help"
+                                                             i18n:translate="">
                                                   Help
                                                 </span>
-                                            </label>
-                                        </tal:ifLabel>
-                                        <metal:field
-                                                use-macro="python:context.widget(fieldName, mode='edit')" />
-                                    </div>
+                                                </label>
+                                            </tal:ifLabel>
+                                            <metal:field
+                                                    use-macro="python:context.widget(fieldName, mode='edit')" />
+                                        </div>
 
-                                </td>
-                            </tal:columns>
-                        </tr>
-                    </tal:def>
-                </tal:field>
-                </thead>
+                                    </td>
+                                </tal:columns>
+                            </tr>
+                        </tal:def>
+                    </tal:field>
+                    </thead>
                 </table>
             </fieldset>
 
-        <span>
+            <span>
             <div style="text-align:left;padding-bottom:10px;">
             <input i18n:attributes="value"
                     class="context button allowMultiSubmit"
@@ -329,10 +330,11 @@
         </div>
         </span>
 
-    </form>
+        </form>
     </div>
+
     </div>
-    </div>
+
 
 </body>
 </html>

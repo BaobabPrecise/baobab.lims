@@ -35,7 +35,7 @@ window.baobab.lims.controllers =  {
         ['BaobabBiospecimensView'],
     ".portaltype-samplebatch":
         ['BaobabBiospecimensView', 'BaobabSampleBatchEditView'],
-    "#baobab_sample_shipment_edit":
+    "#sample_shipment_edit_form":
         ['BaobabSampleShipmentEditView'],
     "#export-display-table":
         ['ExportTableView']
