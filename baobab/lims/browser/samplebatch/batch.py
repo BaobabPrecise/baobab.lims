@@ -12,6 +12,7 @@ from baobab.lims.browser.project.util import SampleGeneration
 from baobab.lims.browser.project import get_first_sampletype
 from baobab.lims.browser.biospecimens.biospecimens import BiospecimensView
 from baobab.lims import bikaMessageFactory as _
+from plone import api as ploneapi
 
 
 class BatchBiospecimensView(BiospecimensView):
@@ -137,6 +138,11 @@ class EditView(BrowserView):
 
             batch.processForm()
             self.create_samples(batch, self.form, new_qty - old_qty, member)
+
+            # project = batch.getField('Project').get(batch)
+            # if project and project.UID != self.form['Project_uid']:
+            self.move_aliquots_onto_batch_project(batch)
+
             batch.getField('BatchId').set(batch, batch.Title())
             batch.reindexObject()
 
@@ -146,6 +152,18 @@ class EditView(BrowserView):
             return
 
         return self.template()
+
+    def move_aliquots_onto_batch_project(self, batch):
+
+        project = batch.getField('Project').get(batch)
+        samples = batch.getSamples()
+
+        for sample in samples:
+            field_p = sample.getField('Project')
+            field_p.set(sample, project)
+            sample.reindexObject()
+
+            ploneapi.content.move(source=sample, target=project)
 
     def validate_form_input(self):
         subject_id = self.form.get('SubjectID')

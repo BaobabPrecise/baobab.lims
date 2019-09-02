@@ -18,6 +18,7 @@ from zope.component import queryUtility
 from Products.Archetypes.interfaces.vocabulary import IVocabulary
 from plone.registry.interfaces import IRegistry
 from Products.Archetypes.utils import DisplayList
+from Products.CMFCore.utils import getToolByName
 
 import sys
 
@@ -264,6 +265,21 @@ class SampleBatch(BaseContent):
 
     def getSerumColours(self):
         return ['', 'golden (semi-transparent)', 'pink or red (haemolised)', 'opaque or white (lipaemic)']
+
+    def getSamples(self):
+
+        pc = getToolByName(self, 'portal_catalog')
+
+        batch_of_samples = []
+        sample_brains = pc(portal_type='Sample')
+        print(sample_brains)
+        for brain in sample_brains:
+            sample = brain.getObject()
+            batch = sample.getField('Batch').get(sample)
+            if batch and batch.UID() == self.UID():
+                batch_of_samples.append(sample)
+
+        return batch_of_samples
 
 
 def ObjectModifiedEventHandler(instance, event):
