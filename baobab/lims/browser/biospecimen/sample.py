@@ -1,4 +1,5 @@
 from DateTime import DateTime
+from dateutil.parser import parse
 from zope.schema import ValidationError
 
 from Products.CMFCore.utils import getToolByName
@@ -120,7 +121,9 @@ class EditView(BrowserView):
             from bika.lims.utils import tmpID
 
             try:
+
                 self.validate_form_input()
+
             except ValidationError as e:
                 self.form_error(e.message)
                 return
@@ -197,6 +200,14 @@ class EditView(BrowserView):
         sampling_date = self.form.get('SamplingDate')
         if not sampling_date:
             raise ValidationError(['Sampling Date cannot be empty!'])
+
+        frozen_time = self.form.get('FrozenTime')
+        try:
+            if frozen_time:
+                date_time = parse(frozen_time)
+        except Exception as e:
+            raise ValidationError(str(e))
+
 
     def form_error(self, msg):
         self.context.plone_utils.addPortalMessage(msg)
