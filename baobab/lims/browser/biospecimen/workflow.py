@@ -1,3 +1,5 @@
+import datetime
+
 from Products.Archetypes.exceptions import ReferenceException
 
 from bika.lims.browser.bika_listing import WorkflowAction
@@ -86,6 +88,9 @@ class BiospecimenWorkflowAction(WorkflowAction):
                 if 'Type' in form and form['Type'][0][uid]:
                     obj.getField('SampleType').set(obj, form['Type'][0][uid])
                 if 'FrozenTime' in form and form['FrozenTime'][0][uid]:
+                    if not self.frozen_time_format_is_valid(form['FrozenTime'][0][uid]):
+                        self.context.plone_utils.addPortalMessage('Invalid date and time format for %s' % form['Barcode'][0][uid], 'error')
+                        continue
                     obj.getField('FrozenTime').set(obj, form['FrozenTime'][0][uid])
                 min_volume = obj.getSampleType().getMinimumVolume()
                 volume_unit = min_volume.split(' ')
@@ -112,3 +117,12 @@ class BiospecimenWorkflowAction(WorkflowAction):
 
         self.destination_url += '/biospecimens'
         self.request.response.redirect(self.destination_url)
+
+    def frozen_time_format_is_valid(self, frozen_time):
+
+        try:
+            date_time_obj = datetime.datetime.strptime(frozen_time, '%Y-%m-%d %H:%M')
+            return True
+        except:
+            return False
+

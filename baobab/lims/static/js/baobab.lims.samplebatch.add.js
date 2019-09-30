@@ -3,6 +3,7 @@ function BaobabSampleBatchEditView() {
     var that = this;
 
     that.load = function () {
+        // console.debug('On sample batch view')
         // disable browser auto-complete
         $('input[type=text]').prop('autocomplete', 'off');
 
@@ -15,7 +16,7 @@ function BaobabSampleBatchEditView() {
         window.bika.lims.jsonapi_read(requestData, function (data) {
             if (data.success && data.total_objects > 0) {
 
-                console.log(data.objects[0])
+                // console.log(data.objects[0])
 
                 var creation_date = data.objects[0]['DateCreated']
                 if (creation_date){
@@ -52,10 +53,10 @@ function BaobabSampleBatchEditView() {
     function getGMTFormatDate(plone_date_string){
 
         var pieces = plone_date_string.split(/[-/ :]/)
-        console.log(pieces)
+        // console.log(pieces)
 
         final_date = [pieces[0], pieces[1], pieces[2]].join('-') + ' ' + [pieces[3], pieces[4]].join(':')
-        console.log(final_date)
+        // console.log(final_date)
         return final_date
     }
 

@@ -3,6 +3,7 @@ function BaobabBiospecimensView() {
     var that = this;
 
     that.load = function () {
+        console.debug('On biospecimens view')
         // disable browser auto-complete
         $('input[type=text]').prop('autocomplete', 'off');
 
@@ -28,6 +29,10 @@ function BaobabBiospecimensView() {
 
         $($('select[selector^="Type_"]')).change(function () {
             cascadeSelectSampleType($(this))
+        });
+
+        $(".FrozenTimeOnGrid").each(function(){
+            $(this).datetimepicker({dateFormat: 'yy-mm-dd'});
         });
 
         $($('input[selector^="Barcode_"]')).on('input', function() {                //change(function () {
