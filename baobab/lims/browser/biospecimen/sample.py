@@ -10,6 +10,7 @@ from baobab.lims.interfaces import IProject
 from plone.registry.interfaces import IRegistry
 from zope.component import queryUtility
 import datetime
+from plone import api as ploneapi
 
 class UpdateBoxes(BrowserView):
     """
@@ -126,30 +127,44 @@ class EditView(BrowserView):
                 return
 
             pc = getToolByName(context, "portal_catalog")
-
             folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
 
-            parent = context.aq_parent
+            # parent = context.aq_parent
             #
             # if IProject.providedBy(parent):
-            #     print('--------This is parent')
-            #     print(parent)
             #     folder = parent
             # else:
-            #
             #     folder = pc(portal_type="Project", UID=request.form['Project_uid'])[0].getObject()
-            #     print('--------This is from the form')
-            #     print(folder)
 
-            if not folder.hasObject(context.getId()):
+            # if not folder.hasObject(context.getId()):
+            #     sample = _createObjectByType('Sample', folder, tmpID())
+            # else:
+            #     sample = context
+
+            date_created = context.getField('DateCreated').get(context)
+            if date_created is None:
+                print('====date created is none and new sample is created')
                 sample = _createObjectByType('Sample', folder, tmpID())
             else:
+                print('====date exists and context becomes sample')
                 sample = context
 
-            if IProject.providedBy(parent):
-                sample.getField('Project').set(sample, parent)
-            else:
-                sample.getField('Project').set(sample, request.form['Project_uid'])
+            if not folder.hasObject(sample.getId()):
+                print('====sample is not in folder')
+                # url = sample.absolute_url(relative=True)
+                sample.getField('Project').set(sample, folder)
+                ploneapi.content.move(source=sample, target=folder)
+
+                # old_sample = ploneapi.content.get(path=url)
+                # if old_sample:
+                #     ploneapi.content.delete(obj=old_sample)
+
+                # if IProject.providedBy(parent):
+                #     print('====the project is provided by parent')
+                #     sample.getField('Project').set(sample, parent)
+                # else:
+                #     print('====project comes from the form')
+                #     sample.getField('Project').set(sample, request.form['Project_uid'])
 
             # sample.getField('AllowSharing').set(sample, request.form['AllowSharing'])
             sample.getField('Kit').set(sample, request.form['Kit_uid'])

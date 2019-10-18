@@ -5,7 +5,8 @@ from zope.interface.declarations import implements
 from AccessControl import getSecurityManager
 from Products.CMFCore.permissions import AddPortalContent, ModifyPortalContent
 
-from bika.lims.browser.bika_listing import BikaListingView
+# from bika.lims.browser.bika_listing import BikaListingView
+from baobab.lims.browser.bika_listing import BikaListingView
 from bika.lims.utils import isActive
 from bika.lims.interfaces import ISample
 from baobab.lims.interfaces import ISharableSample

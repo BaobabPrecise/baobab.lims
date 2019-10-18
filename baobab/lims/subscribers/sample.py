@@ -49,6 +49,9 @@ def ObjectModifiedEventHandler(instance, event):
 
         updateLocalServerTime(instance)
 
+        # print('=============Inside the object modified')
+        # print(instance.__dict__)
+
 def updateLocalServerTime(instance):
 
     sampling_date = instance.getField('SamplingDate').get(instance)
