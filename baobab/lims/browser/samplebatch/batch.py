@@ -34,16 +34,17 @@ class BatchBiospecimensView(BiospecimensView):
 
     def folderitems(self, full_objects=False):
         items = BiospecimensView.folderitems(self)
-        out_items = []
-        for item in items:
-            if "obj" not in item:
-                continue
-            obj = item['obj']
-            batch = obj.getField('Batch').get(obj)
-            if batch:
-                batch_uid = batch.UID()
-                if batch_uid == self.context.UID():
-                    out_items.append(item)
+        out_items = list(t for t in items if t['obj'] and t['obj'].getField('Batch').get(t['obj']) and t['obj'].getField('Batch').get(t['obj']).UID() == self.context.UID())
+        #out_items = []
+        #for item in items:
+        #    if "obj" not in item:
+        #        continue
+        #    obj = item['obj']
+        #    batch = obj.getField('Batch').get(obj)
+        #    if batch:
+        #        batch_uid = batch.UID()
+        #        if batch_uid == self.context.UID():
+        #            out_items.append(item)
         return out_items
 
 
