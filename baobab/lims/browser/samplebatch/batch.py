@@ -12,6 +12,7 @@ from baobab.lims.browser.project.util import SampleGeneration
 from baobab.lims.browser.project import get_first_sampletype
 from baobab.lims.browser.biospecimens.biospecimens import BiospecimensView
 from baobab.lims import bikaMessageFactory as _
+import threading
 
 
 class BatchBiospecimensView(BiospecimensView):
@@ -22,29 +23,45 @@ class BatchBiospecimensView(BiospecimensView):
         BiospecimensView.__init__(self, context, request, 'batch')
         self.context = context
         self.context_actions = {}
+        self.catalog = "bika_catalog"
 
         # Filter biospecimens by project uid
         self.columns.pop('Project', None)
         # path = '/'.join(self.context.getPhysicalPath())
         for state in self.review_states:
             # state['contentFilter']['path'] = {'query': path, 'depth': 1}
-            state['contentFilter']['getProjectUID'] = self.context.aq_parent.UID()
+            state['contentFilter']['getProjectUID'] = self.context.getProject().UID()
             state['contentFilter']['sort_on'] = 'sortable_title'
             state['columns'].remove('Project')
 
     def folderitems(self, full_objects=False):
         items = BiospecimensView.folderitems(self)
-        out_items = list(t for t in items if t['obj'] and t['obj'].getField('Batch').get(t['obj']) and t['obj'].getField('Batch').get(t['obj']).UID() == self.context.UID())
-        #out_items = []
-        #for item in items:
-        #    if "obj" not in item:
-        #        continue
-        #    obj = item['obj']
-        #    batch = obj.getField('Batch').get(obj)
-        #    if batch:
-        #        batch_uid = batch.UID()
-        #        if batch_uid == self.context.UID():
-        #            out_items.append(item)
+
+        number_of_threads = 20
+        if len(items) < number_of_threads:
+            return list(t for t in items if t['obj'] and t['obj'].getField('Batch').get(t['obj']) and t['obj'].getField('Batch').get(t['obj']).UID() == self.context.UID())
+        
+        out_items = []
+        
+        def worker():
+            while stack:
+                try:
+                    x = stack.pop()
+                    #print "stack size: " + str(len(stack))
+                except IndexError:
+                    pass
+                else:
+                    if x['obj'] and x['obj'].getField('Batch').get(x['obj']) and x['obj'].getField('Batch').get(x['obj']).UID() == self.context.UID():
+                        out_items.append(x)
+
+        threads = [threading.Thread(target=worker) for i in range(number_of_threads)]
+
+        stack = items
+        for t in threads:
+            t.daemon = True
+            t.start()
+        for t in threads:
+            t.join()
         return out_items
 
 
