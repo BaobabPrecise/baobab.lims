@@ -12,7 +12,6 @@ from baobab.lims.browser.project.util import SampleGeneration
 from baobab.lims.browser.project import get_first_sampletype
 from baobab.lims.browser.biospecimens.biospecimens import BiospecimensView
 from baobab.lims import bikaMessageFactory as _
-import threading
 
 
 class BatchBiospecimensView(BiospecimensView):
