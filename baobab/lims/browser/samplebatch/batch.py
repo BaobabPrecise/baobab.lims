@@ -37,31 +37,7 @@ class BatchBiospecimensView(BiospecimensView):
     def folderitems(self, full_objects=False):
         items = BiospecimensView.folderitems(self)
 
-        number_of_threads = 20
-        if len(items) < number_of_threads:
-            return list(t for t in items if t['obj'] and t['obj'].getField('Batch').get(t['obj']) and t['obj'].getField('Batch').get(t['obj']).UID() == self.context.UID())
-        
-        out_items = []
-        
-        def worker():
-            while stack:
-                try:
-                    x = stack.pop()
-                    #print "stack size: " + str(len(stack))
-                except IndexError:
-                    pass
-                else:
-                    if x['obj'] and x['obj'].getField('Batch').get(x['obj']) and x['obj'].getField('Batch').get(x['obj']).UID() == self.context.UID():
-                        out_items.append(x)
-
-        threads = [threading.Thread(target=worker) for i in range(number_of_threads)]
-
-        stack = items
-        for t in threads:
-            t.daemon = True
-            t.start()
-        for t in threads:
-            t.join()
+        out_items = list(t for t in items if t['obj'] and t['obj'].getField('Batch').get(t['obj']) and t['obj'].getField('Batch').get(t['obj']).UID() == self.context.UID())
         return out_items
 
 
