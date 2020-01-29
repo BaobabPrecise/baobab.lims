@@ -777,7 +777,7 @@ class SamplesExporter(object):
         # if brains:
         samples.append(['Title', 'Project_Visit_Type', 'Sample_Type','Storage_Location', 'Sampling_Time',
                         'Subject_ID', 'Barcode_Kit_ID', 'Volume', 'Unit', 'Baby_No', 'Sample_State',
-                        'Date_Created', 'SampleID_field', 'Status', 'Last_Modified_By', 'Last_Modified_Date',
+                        'Date_Created', 'SampleID_field', 'Status', 'Frozen_Time', 'Last_Modified_By', 'Last_Modified_Date',
                         'Sample_ID', 'UID', 'Parent_UID', 'URL_path'])
         for brain in brains:
             sample = brain.getObject()
@@ -812,6 +812,7 @@ class SamplesExporter(object):
                 row.append(sample.getField('SampleID').get(sample))
                 cancellationstate = workflow.getInfoFor(sample, "cancellation_state")
                 row.append(cancellationstate)
+                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
