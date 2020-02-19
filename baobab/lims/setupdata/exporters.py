@@ -812,7 +812,10 @@ class SamplesExporter(object):
                 row.append(sample.getField('SampleID').get(sample))
                 cancellationstate = workflow.getInfoFor(sample, "cancellation_state")
                 row.append(cancellationstate)
-                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                try:
+                    row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                except:
+                    row.append(str(sample.getField('FrozenTime').get(sample)))
 
                 last_modified_user = sample.getField('ChangeUserName').get(sample)
                 last_modified_date = ''
@@ -867,7 +870,11 @@ class SamplesAliquotExporter(object):
                 else:
                     row.append('')                
                 # row.append(sample.getField('SamplingDate').get(sample))
-                row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                try:
+                    row.append(sample.getField('FrozenTime').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('FrozenTime').get(sample) else '')
+                except:
+                    row.append(str(sample.getField('FrozenTime').get(sample)))
+
                 row.append(sample.getSampleState())
                 row.append(sample.getField('SamplingDate').get(sample).strftime("%Y-%m-%d %H:%M") if sample.getField('SamplingDate').get(sample) else '')
                 row.append(parent_sample.getField('Barcode').get(parent_sample))

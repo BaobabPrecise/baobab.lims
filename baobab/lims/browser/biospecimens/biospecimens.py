@@ -361,7 +361,10 @@ class BiospecimensView(BikaListingView):
                                            (items[x]['url'], items[x]['Title'])
             frozen_time = obj.getField('FrozenTime').get(obj)
             if frozen_time:
-                items[x]['FrozenTime'] = frozen_time.strftime("%Y/%m/%d %H:%M")
+                try:
+                    items[x]['FrozenTime'] = frozen_time.strftime("%Y/%m/%d %H:%M")
+                except:
+                    items[x]['FrozenTime'] = str(frozen_time)
                 # items[x]['FrozenTime'] = frozen_time.strftime("%Y%m%d %H:%M:%S")
 
             batch = obj.getField('Batch').get(obj)
